@@ -1,0 +1,14 @@
+{
+  "name": "dsTODO",
+  "image": "mcr.microsoft.com/devcontainers/base:jammy",
+  "customizations": {
+    "vscode": {
+      "extensions": ["golang.Go"]
+    }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/go:1": {
+      "version": "latest"
+    }
+  }
+}
