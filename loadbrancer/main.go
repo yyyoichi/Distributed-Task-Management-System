@@ -31,11 +31,11 @@ func main() {
 	}
 	addr := fmt.Sprintf(":%s", port)
 
+	log.Println("start loadbrancer")
 	http.HandleFunc("/", proxy.handler)
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Fatal(err)
 	}
-	log.Println("start loadbrancer")
 }
 
 func NewProxy() TProxy {
@@ -71,4 +71,5 @@ func (p *TProxy) handler(w http.ResponseWriter, r *http.Request) {
 
 	// Serve the request using the reverse proxy
 	proxy.ServeHTTP(w, r)
+	log.Printf("[LB] Proxy to: %s\n", backend)
 }

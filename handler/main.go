@@ -14,22 +14,22 @@ import (
 
 func main() {
 	handler(context.Background(), os.Stdin)
-	log.Println("start handler")
 	select {}
 }
 
 var url = fmt.Sprintf("http://%s", os.Getenv("LB_ADDR"))
 
 func handler(cxt context.Context, r io.Reader) {
-	log.Printf("[Rq] Get Request\n")
+	bar := "------------------------------------"
+	log.Printf("\n\n%s\n   ^^ command list (run 'help') ^^\n%s\n%s\n\n", bar, bar, request(cxt, "help"))
 	sc := bufio.NewScanner(r)
 	go func() {
 		for {
-			fmt.Printf("Create TODO list... ")
+			fmt.Printf("Please enter the command... ")
 			sc.Scan()
 			input := sc.Text()
 			output := request(cxt, input)
-			log.Println(output)
+			log.Printf("\n%s", output)
 		}
 	}()
 }

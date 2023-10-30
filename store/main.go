@@ -17,9 +17,9 @@ func main() {
 
 	var store = store.NewStore()
 
+	log.Println("start key-value store")
 	http.HandleFunc("/", store.Handler)
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Println(err)
 	}
-	log.Println("start database")
 }
