@@ -48,11 +48,11 @@ func (s *TStore) handler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	s.Save(data.Task)
+	s.Create(data.Task)
 	w.WriteHeader(http.StatusOK)
 }
 
-func (s *TStore) Save(task string) {
+func (s *TStore) Create(task string) {
 	s.mu.Lock()
 	id := s.nextID()
 	s.ByID[id] = task

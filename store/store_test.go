@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestSaveTODO(t *testing.T) {
+func TestCreateTODO(t *testing.T) {
 	test := []struct {
 		tasks       []string
 		expectedLen int
@@ -20,7 +20,7 @@ func TestSaveTODO(t *testing.T) {
 		for _, task := range tt.tasks {
 			go func(t string) {
 				defer wg.Done()
-				store.Save(t)
+				store.Create(t)
 			}(task)
 		}
 		wg.Wait()
