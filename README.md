@@ -52,7 +52,7 @@ TODOリストを分散キーバリューストアに保存するCLIアプリケ�
 ## CLIコマンド
 
 ### "create" コマンド:
-- 引数: <task>
+- 引数: \<task\>
 - 動作: 新しいTODOを作成し、そのIDを返します。
 - エラー: 引数が正しくない場合、ErrSyntaxInvalidArgsとエラーメッセージを返します。
 ### "list" コマンド:
@@ -60,11 +60,11 @@ TODOリストを分散キーバリューストアに保存するCLIアプリケ�
 - 動作: 未完了のTODOと完了したTODOをリストとして返します。
 - エラー: このコマンドではエラーは発生しません。
 ### "update" コマンド:
-- 引数: <id> <status> (status は "complete" または "open")
+- 引数: \<id\> \<status\> (status は "complete" または "open")
 - 動作: 指定されたIDのTODOのステータスを更新します。
 - エラー: 引数が正しくない場合、ErrSyntaxInvalidArgsとエラーメッセージを返します。指定されたIDが存在しない場合は、ErrNoDataFoundとエラーメッセージを返します。
 ### "delete" コマンド:
-- 引数: <id>
+- 引数: \<id\>
 - 動作: 指定されたIDのTODOを削除します。
 - エラー: 引数が正しくない場合、ErrSyntaxInvalidArgsとエラーメッセージを返します。指定されたIDが存在しない場合は、ErrNoDataFoundとエラーメッセージを返します。
 ### "help" コマンド:
