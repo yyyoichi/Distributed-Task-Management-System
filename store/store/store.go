@@ -1,17 +1,11 @@
 package store
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
-	"net/http"
 	"strconv"
 	"strings"
 	"sync"
-
-	"github.com/go-playground/validator"
 )
 
 var (
@@ -36,42 +30,7 @@ type TStore struct {
 	}
 }
 
-type ReqJson struct {
-	Task string `json:"task" validate:"required"`
-}
-
-func (s *TStore) Handler(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.Body)
-	var data ReqJson
-	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(bytes.NewBufferString(err.Error()).Bytes())
-		return
-	}
-	validate := validator.New()
-	if err := validate.Struct(data); err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	log.Printf("[KV] Get cmds '%s'\n", data.Task)
-	cmds := strings.Split(data.Task, " ")
-	resp, err := s.read(cmds)
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(bytes.NewBufferString(err.Error()).Bytes())
-		return
-	}
-	log.Println("[KV] Response 200")
-	w.Write(bytes.NewBufferString(resp).Bytes())
-	w.WriteHeader(http.StatusOK)
-}
-
-func (s *TStore) read(cmds []string) (string, error) {
+func (s *TStore) Read(cmds []string) (string, error) {
 	var resp string
 	switch cmds[0] {
 	case "create":

@@ -33,7 +33,7 @@ func TestTStore_Read(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		resp, err := tStore.read(test.cmds)
+		resp, err := tStore.Read(test.cmds)
 		if err != nil && err.Error() != test.err.Error() {
 			t.Errorf("For commands %v, expected error: %v, but got: %v", test.cmds, test.err, err)
 		}
