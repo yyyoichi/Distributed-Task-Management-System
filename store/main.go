@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"yyyoichi/Distributed-Task-Management-System/database/store"
 )
 
 func main() {
@@ -14,9 +15,9 @@ func main() {
 	}
 	addr := fmt.Sprintf(":%s", port)
 
-	var store = NewStore()
+	var store = store.NewStore()
 
-	http.HandleFunc("/", store.handler)
+	http.HandleFunc("/", store.Handler)
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Println(err)
 	}

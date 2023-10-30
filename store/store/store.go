@@ -1,4 +1,4 @@
-package main
+package store
 
 import (
 	"bytes"
@@ -38,7 +38,7 @@ type ReqJson struct {
 	Task string `validate:"required"`
 }
 
-func (s *TStore) handler(w http.ResponseWriter, r *http.Request) {
+func (s *TStore) Handler(w http.ResponseWriter, r *http.Request) {
 	var data *ReqJson
 	if err := json.NewDecoder(r.Body).Decode(data); err != nil {
 		log.Println(err)
