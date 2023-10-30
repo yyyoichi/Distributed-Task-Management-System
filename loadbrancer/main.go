@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	var proxy = TProxy{}
+	var proxy = NewProxy()
 
 	// export server ports
 	ports := os.Getenv("EXPORTS")
@@ -33,6 +33,14 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Println("start loadbrancer")
+}
+
+func NewProxy() TProxy {
+	return TProxy{
+		[]string{},
+		0,
+		&sync.Mutex{},
+	}
 }
 
 type TProxy struct {
