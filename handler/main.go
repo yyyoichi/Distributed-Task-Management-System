@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -26,15 +27,33 @@ func handler(cxt context.Context, r io.Reader) {
 		for {
 			fmt.Printf("Create TODO list... ")
 			sc.Scan()
-			task := sc.Text()
-			body := []byte(fmt.Sprintf(`{"task":"%s"}`, task))
-			resp, err := http.Post(url, "application/json", bytes.NewBuffer(body))
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-			fmt.Printf("TODO is Created!\n")
-			resp.Body.Close()
+			input := sc.Text()
+			output := request(cxt, input)
+			log.Println(output)
 		}
 	}()
+}
+
+var (
+	ErrNetwork        = errors.New("cannnot 'post' request")
+	ErrResponseDecode = errors.New("cannot decode response body")
+)
+
+func request(cxt context.Context, input string) string {
+	body := []byte(fmt.Sprintf(`{"task":"%s"}`, input))
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(body))
+	if err != nil {
+		return fmt.Sprintf("Error\n%s:%s", ErrNetwork, err)
+	}
+	defer resp.Body.Close()
+
+	output, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Sprintf("Error\n%s:%s", ErrResponseDecode, err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Sprintf("Error:\n%s", string(output))
+	}
+	return string(output)
 }
