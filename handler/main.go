@@ -17,7 +17,7 @@ func main() {
 	select {}
 }
 
-var url = fmt.Sprintf("http://localhost:%s", os.Getenv("LB_PORT"))
+var url = fmt.Sprintf("http://%s", os.Getenv("LB_ADDR"))
 
 func handler(cxt context.Context, r io.Reader) {
 	log.Printf("[Rq] Get Request\n")

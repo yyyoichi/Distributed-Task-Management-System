@@ -20,7 +20,10 @@ func main() {
 		log.Println("export ports is not found")
 		return
 	}
-	proxy.backend = strings.Split(ports, ",")
+	for _, schema := range strings.Split(ports, ",") {
+		proxy.backend = append(proxy.backend, fmt.Sprintf("http://%s", schema))
+	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		log.Println("port is not found")

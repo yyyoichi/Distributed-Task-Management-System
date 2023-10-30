@@ -6,13 +6,8 @@ services:
     volumes:
       - ./handler:/workspace:cached
     environment:
-      - LB_PORT=3000
+      - LB_ADDR=loadbrancer:3000
     tty: true
-    command:
-      - 'sh'
-      - '-c'
-      - >-
-        go run /workspace/main.go
 
   loadbrancer:
     image: golang:1.21.3-bullseye
@@ -21,7 +16,7 @@ services:
       - ./loadbrancer:/workspace:cached
     environment:
       - PORT=3000
-      - EXPORTS="3316,3326"
+      - EXPORTS=store1:3316,store2:3326
     ports:
       - "3000:3000"
     tty: true
@@ -62,7 +57,7 @@ services:
       - '-c'
       - >-
         cd /workspace && go mod tidy && go run main.go
-  
+
   sync:
     image: golang:1.21.3-bullseye
     container_name: "sync"
