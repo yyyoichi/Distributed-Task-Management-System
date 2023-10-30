@@ -35,7 +35,7 @@ services:
     image: golang:1.21.3-bullseye
     container_name: "store1"
     volumes:
-      - ./database:/workspace:cached
+      - ./store:/workspace:cached
     environment:
       - PORT=3316
     ports:
@@ -45,13 +45,13 @@ services:
       - 'sh'
       - '-c'
       - >-
-        go run /workspace/main.go
+        cd /workspace && go mod tidy && go run main.go
 
   store2:
     image: golang:1.21.3-bullseye
     container_name: "store2"
     volumes:
-      - ./database:/workspace:cached
+      - ./store:/workspace:cached
     environment:
       - PORT=3326
     ports:
@@ -61,7 +61,7 @@ services:
       - 'sh'
       - '-c'
       - >-
-        go run /workspace/main.go
+        cd /workspace && go mod tidy && go run main.go
   
   sync:
     image: golang:1.21.3-bullseye

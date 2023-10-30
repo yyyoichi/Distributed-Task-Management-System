@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"yyyoichi/Distributed-Task-Management-System/database/store"
+	"yyyoichi/Distributed-Task-Management-System/store/store"
 )
 
 func main() {
