@@ -88,6 +88,29 @@ TODOリストを分散キーバリューストアに保存するCLIアプリケ�
 
 **競合解決**:
 
+## 使い方
+
+### 必要なもの
+
+- docker
+- docker compose
+- make
+
+## 実行方法
+
+1. `make up`
+2. `make exec`してコンテナ内で`go run .`
+3. <a href="#cliコマンド">cli コマンド</a>を参考にして実行する
+
+## ログの確認方法
+
+- `loadbrancer` -> `make logs-loadbrancer`
+- `store1` -> `make logs-store1`
+- `store2` -> `make logs-store2`
+
+## 終了方法(コンテナ削除)
+
+`make rm`
 
 ## CLIコマンド
 
