@@ -128,3 +128,66 @@ func TestTStore_Delete(t *testing.T) {
 		t.Errorf("Expected error: '%s', but got: %v", expectedErr, err)
 	}
 }
+
+func TestTStore_GetLatestVersionTodo(t *testing.T) {
+	test := []struct {
+		todos          []string
+		tagetVersion   int
+		expectedLength int
+	}{
+		{
+			todos:          []string{"TaskA", "TaskB", "TaskC"},
+			tagetVersion:   2,
+			expectedLength: 1,
+		},
+		{
+			todos:          []string{"TaskA"},
+			tagetVersion:   1,
+			expectedLength: 0,
+		},
+	}
+
+	for i, tt := range test {
+		tStore := NewStore()
+		for _, todo := range tt.todos {
+			_ = tStore.Create(todo)
+		}
+		actTODO := tStore.GetLatestVersionTodo(tt.tagetVersion)
+		if len(actTODO) != tt.expectedLength {
+			t.Errorf("%d: Expected len(actTODO) is '%d', but got='%d'", i, tt.expectedLength, len(actTODO))
+		}
+	}
+}
+
+func TestTStore_SyncTodoAt(t *testing.T) {
+	tStore := NewStore()
+	id := tStore.Create("TaskA")
+
+	// sync
+	todo := todo{
+		task:      "Task-1st",
+		completed: false,
+		deleted:   false,
+		version:   100,
+	}
+	if err := tStore.SyncTodoAt(id, todo); err != nil {
+		t.Error(err)
+	}
+
+	if tStore.ByID[id].task != "Task-1st" {
+		t.Errorf("Expected TODO.task 'Task-1st', but got='%s'", tStore.ByID[id].task)
+	}
+
+	// error
+	if err := tStore.SyncTodoAt(9999, todo); err == nil {
+		t.Errorf("Expected error is not nil, but got='nil'")
+	}
+}
+
+func TestTStore_SyncNextVersion(t *testing.T) {
+	tStore := NewStore()
+	tStore.SyncNextVersion(100)
+	if tStore.nextVersion != 100 {
+		t.Errorf("Expected nextVersion is 100, but got='%d'", tStore.nextVersion)
+	}
+}

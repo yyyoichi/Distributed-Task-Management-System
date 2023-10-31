@@ -148,6 +148,37 @@ func (s *TStore) Delete(id int) error {
 	return nil
 }
 
+// [version]よりも大きいバージョンを持つTODOを返す
+func (s *TStore) GetLatestVersionTodo(version int) map[int]*todo {
+	todos := map[int]*todo{}
+	s.mu.Lock()
+	for id, todo := range s.ByID {
+		if version < todo.version {
+			todos[id] = todo
+		}
+	}
+	s.mu.Unlock()
+	return todos
+}
+
+// 更新バージョンを同期する
+func (s *TStore) SyncNextVersion(newVersion int) {
+	s.nextVersion = newVersion
+}
+
+// データを上書きする。
+func (s *TStore) SyncTodoAt(id int, newTodo todo) error {
+	s.mu.Lock()
+	_, found := s.ByID[id]
+	if !found {
+		err := fmt.Sprintf("not found TODO[ID:%d]", id)
+		return errors.New(err)
+	}
+	s.ByID[id] = &newTodo
+	s.mu.Unlock()
+	return nil
+}
+
 func (s *TStore) nextID() int {
 	max := 0
 	for id := range s.ByID {
