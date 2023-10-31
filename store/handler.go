@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"strings"
 	"yyyoichi/Distributed-Task-Management-System/store/store"
-
-	"github.com/go-playground/validator"
 )
 
 type StoreHandlers struct {
@@ -24,17 +22,10 @@ func (sh *StoreHandlers) commandsHandler(w http.ResponseWriter, r *http.Request)
 	var data struct {
 		Task string `json:"task" validate:"required"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+	if err := parseBody(r, data); err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write(bytes.NewBufferString(err.Error()).Bytes())
-		return
-	}
-	validate := validator.New()
-	if err := validate.Struct(data); err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
 		return
 	}
 
