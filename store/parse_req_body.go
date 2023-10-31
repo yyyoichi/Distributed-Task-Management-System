@@ -8,7 +8,7 @@ import (
 )
 
 func parseBody(r *http.Request, data interface{}) error {
-	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(data); err != nil {
 		return err
 	}
 	validate := validator.New()

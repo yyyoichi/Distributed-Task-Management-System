@@ -22,7 +22,7 @@ func (sh *StoreHandlers) commandsHandler(w http.ResponseWriter, r *http.Request)
 	var data struct {
 		Task string `json:"task" validate:"required"`
 	}
-	if err := parseBody(r, data); err != nil {
+	if err := parseBody(r, &data); err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write(bytes.NewBufferString(err.Error()).Bytes())
