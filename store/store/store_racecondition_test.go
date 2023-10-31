@@ -108,9 +108,12 @@ func TestTStore_ConcurrentDelete(t *testing.T) {
 	wg.Wait()
 
 	// TODOが正しく削除されたことを確認
-	_, found := tStore.ByID[id]
-	if found {
-		t.Errorf("Expected TODO[ID:1] to be deleted, but it was found")
+	todo, found := tStore.ByID[id]
+	if !found {
+		t.Errorf("Expected to find TODO[ID:1], but it was not found")
+	}
+	if !todo.deleted {
+		t.Errorf("Expected deleted: true, but got: false")
 	}
 }
 

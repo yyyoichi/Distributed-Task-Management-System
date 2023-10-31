@@ -63,6 +63,12 @@ func TestTStore_Create(t *testing.T) {
 		if todo.completed {
 			t.Errorf("Expected completed: false, but got: true")
 		}
+		if todo.deleted {
+			t.Errorf("Expected deleted: false, but got: true")
+		}
+		if todo.version != 1 {
+			t.Errorf("Expected version: 1, but got: %d", todo.version)
+		}
 	}
 }
 
@@ -80,6 +86,9 @@ func TestTStore_Update(t *testing.T) {
 	todo, found := tStore.ByID[id]
 	if !found || !todo.completed {
 		t.Errorf("Expected completed: true, but got: false")
+	}
+	if todo.version != 2 {
+		t.Errorf("Expected version: 2, but got: %d", todo.version)
 	}
 
 	// Test updating with invalid ID
@@ -101,9 +110,15 @@ func TestTStore_Delete(t *testing.T) {
 	}
 
 	// Check if the TODO is deleted correctly
-	_, found := tStore.ByID[id]
-	if found {
-		t.Errorf("Expected TODO[ID:1] to be deleted, but it was found")
+	todo, found := tStore.ByID[id]
+	if !found {
+		t.Errorf("Expected to find TODO[ID:1], but it was not found")
+	}
+	if !todo.deleted {
+		t.Errorf("Expected deleted: true, but got: false")
+	}
+	if todo.version != 2 {
+		t.Errorf("Expected version: 2, but got: %d", todo.version)
 	}
 
 	// Test deleting with invalid ID

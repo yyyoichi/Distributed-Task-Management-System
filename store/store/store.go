@@ -16,18 +16,24 @@ var (
 )
 
 func NewStore() TStore {
-	return TStore{ByID: make(map[int]*struct {
-		task      string
-		completed bool
-	})}
+	return TStore{
+		mu:          sync.Mutex{},
+		ByID:        make(map[int]*todo),
+		nextVersion: 1,
+	}
 }
 
 type TStore struct {
-	mu   sync.Mutex
-	ByID map[int]*struct {
-		task      string
-		completed bool
-	}
+	mu          sync.Mutex
+	nextVersion int
+	ByID        map[int]*todo
+}
+
+type todo struct {
+	task      string
+	completed bool
+	version   int
+	deleted   bool
 }
 
 func (s *TStore) Read(cmds []string) (string, error) {
@@ -103,34 +109,41 @@ func (s *TStore) Read(cmds []string) (string, error) {
 func (s *TStore) Create(task string) int {
 	s.mu.Lock()
 	id := s.nextID()
-	s.ByID[id] = &struct {
-		task      string
-		completed bool
-	}{task, false}
+	s.ByID[id] = &todo{
+		task:      task,
+		completed: false,
+		deleted:   false,
+		version:   s.nextVersion,
+	}
+	s.nextVersion++
 	s.mu.Unlock()
 	return id
 }
 
 func (s *TStore) Update(id int, completed bool) error {
+	s.mu.Lock()
 	todo, found := s.ByID[id]
 	if !found {
 		err := fmt.Sprintf("not found TODO[ID:%d]", id)
 		return errors.New(err)
 	}
-	s.mu.Lock()
 	todo.completed = completed
+	todo.version = s.nextVersion
+	s.nextVersion++
 	s.mu.Unlock()
 	return nil
 }
 
 func (s *TStore) Delete(id int) error {
-	_, found := s.ByID[id]
+	s.mu.Lock()
+	todo, found := s.ByID[id]
 	if !found {
 		err := fmt.Sprintf("not found TODO[ID:%d]", id)
 		return errors.New(err)
 	}
-	s.mu.Lock()
-	delete(s.ByID, id)
+	todo.deleted = true
+	todo.version = s.nextVersion
+	s.nextVersion++
 	s.mu.Unlock()
 	return nil
 }
