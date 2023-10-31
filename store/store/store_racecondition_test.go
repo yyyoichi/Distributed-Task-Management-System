@@ -73,7 +73,7 @@ func TestTStore_ConcurrentUpdate(t *testing.T) {
 
 	// TODOが正しく更新されたことを確認
 	todo, found := tStore.ByID[id]
-	if !found || !todo.completed {
+	if !found || !todo.Completed {
 		t.Errorf("Expected completed: true, but got: false")
 	}
 }
@@ -112,7 +112,7 @@ func TestTStore_ConcurrentDelete(t *testing.T) {
 	if !found {
 		t.Errorf("Expected to find TODO[ID:1], but it was not found")
 	}
-	if !todo.deleted {
+	if !todo.Deleted {
 		t.Errorf("Expected deleted: true, but got: false")
 	}
 }
@@ -122,7 +122,7 @@ func (s *TStore) FindIDByTask(task string) int {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	for id, todo := range s.ByID {
-		if todo.task == task {
+		if todo.Task == task {
 			return id
 		}
 	}

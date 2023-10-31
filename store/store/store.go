@@ -18,7 +18,7 @@ var (
 func NewStore() TStore {
 	return TStore{
 		mu:          sync.Mutex{},
-		ByID:        make(map[int]*todo),
+		ByID:        make(map[int]*Todo),
 		nextVersion: 1,
 	}
 }
@@ -26,14 +26,14 @@ func NewStore() TStore {
 type TStore struct {
 	mu          sync.Mutex
 	nextVersion int
-	ByID        map[int]*todo
+	ByID        map[int]*Todo
 }
 
-type todo struct {
-	task      string
-	completed bool
-	version   int
-	deleted   bool
+type Todo struct {
+	Task      string
+	Completed bool
+	Version   int
+	Deleted   bool
 }
 
 func (s *TStore) Read(cmds []string) (string, error) {
@@ -50,8 +50,8 @@ func (s *TStore) Read(cmds []string) (string, error) {
 		list := []string{"TODO: "}
 		cmps := []string{"COMPLETED TODO:"}
 		for id, todo := range s.ByID {
-			s := fmt.Sprintf("%d: %s", id, todo.task)
-			if todo.completed {
+			s := fmt.Sprintf("%d: %s", id, todo.Task)
+			if todo.Completed {
 				cmps = append(cmps, s)
 			} else {
 				list = append(list, s)
@@ -109,11 +109,11 @@ func (s *TStore) Read(cmds []string) (string, error) {
 func (s *TStore) Create(task string) int {
 	s.mu.Lock()
 	id := s.nextID()
-	s.ByID[id] = &todo{
-		task:      task,
-		completed: false,
-		deleted:   false,
-		version:   s.nextVersion,
+	s.ByID[id] = &Todo{
+		Task:      task,
+		Completed: false,
+		Deleted:   false,
+		Version:   s.nextVersion,
 	}
 	s.nextVersion++
 	s.mu.Unlock()
@@ -127,8 +127,8 @@ func (s *TStore) Update(id int, completed bool) error {
 		err := fmt.Sprintf("not found TODO[ID:%d]", id)
 		return errors.New(err)
 	}
-	todo.completed = completed
-	todo.version = s.nextVersion
+	todo.Completed = completed
+	todo.Version = s.nextVersion
 	s.nextVersion++
 	s.mu.Unlock()
 	return nil
@@ -141,20 +141,20 @@ func (s *TStore) Delete(id int) error {
 		err := fmt.Sprintf("not found TODO[ID:%d]", id)
 		return errors.New(err)
 	}
-	todo.deleted = true
-	todo.version = s.nextVersion
+	todo.Deleted = true
+	todo.Version = s.nextVersion
 	s.nextVersion++
 	s.mu.Unlock()
 	return nil
 }
 
 // [version]よりも大きいバージョンを持つTODOを返す
-func (s *TStore) GetLatestVersionTodo(version int) map[int]*todo {
-	todos := map[int]*todo{}
+func (s *TStore) GetLatestVersionTodo(version int) map[int]Todo {
+	todos := map[int]Todo{}
 	s.mu.Lock()
 	for id, todo := range s.ByID {
-		if version < todo.version {
-			todos[id] = todo
+		if version < todo.Version {
+			todos[id] = *todo
 		}
 	}
 	s.mu.Unlock()
@@ -167,7 +167,7 @@ func (s *TStore) SyncNextVersion(newVersion int) {
 }
 
 // データを上書きする。
-func (s *TStore) SyncTodoAt(id int, newTodo todo) error {
+func (s *TStore) SyncTodoAt(id int, newTodo Todo) error {
 	s.mu.Lock()
 	_, found := s.ByID[id]
 	if !found {

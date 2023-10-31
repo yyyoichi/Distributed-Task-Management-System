@@ -57,17 +57,17 @@ func TestTStore_Create(t *testing.T) {
 	if !found {
 		t.Errorf("Expected to find TODO[ID:1], but it was not found")
 	} else {
-		if todo.task != "Task 1" {
-			t.Errorf("Expected task: 'Task 1', but got: %s", todo.task)
+		if todo.Task != "Task 1" {
+			t.Errorf("Expected task: 'Task 1', but got: %s", todo.Task)
 		}
-		if todo.completed {
+		if todo.Completed {
 			t.Errorf("Expected completed: false, but got: true")
 		}
-		if todo.deleted {
+		if todo.Deleted {
 			t.Errorf("Expected deleted: false, but got: true")
 		}
-		if todo.version != 1 {
-			t.Errorf("Expected version: 1, but got: %d", todo.version)
+		if todo.Version != 1 {
+			t.Errorf("Expected version: 1, but got: %d", todo.Version)
 		}
 	}
 }
@@ -84,11 +84,11 @@ func TestTStore_Update(t *testing.T) {
 
 	// Check if the status is updated correctly
 	todo, found := tStore.ByID[id]
-	if !found || !todo.completed {
+	if !found || !todo.Completed {
 		t.Errorf("Expected completed: true, but got: false")
 	}
-	if todo.version != 2 {
-		t.Errorf("Expected version: 2, but got: %d", todo.version)
+	if todo.Version != 2 {
+		t.Errorf("Expected version: 2, but got: %d", todo.Version)
 	}
 
 	// Test updating with invalid ID
@@ -114,11 +114,11 @@ func TestTStore_Delete(t *testing.T) {
 	if !found {
 		t.Errorf("Expected to find TODO[ID:1], but it was not found")
 	}
-	if !todo.deleted {
+	if !todo.Deleted {
 		t.Errorf("Expected deleted: true, but got: false")
 	}
-	if todo.version != 2 {
-		t.Errorf("Expected version: 2, but got: %d", todo.version)
+	if todo.Version != 2 {
+		t.Errorf("Expected version: 2, but got: %d", todo.Version)
 	}
 
 	// Test deleting with invalid ID
@@ -164,18 +164,18 @@ func TestTStore_SyncTodoAt(t *testing.T) {
 	id := tStore.Create("TaskA")
 
 	// sync
-	todo := todo{
-		task:      "Task-1st",
-		completed: false,
-		deleted:   false,
-		version:   100,
+	todo := Todo{
+		Task:      "Task-1st",
+		Completed: false,
+		Deleted:   false,
+		Version:   100,
 	}
 	if err := tStore.SyncTodoAt(id, todo); err != nil {
 		t.Error(err)
 	}
 
-	if tStore.ByID[id].task != "Task-1st" {
-		t.Errorf("Expected TODO.task 'Task-1st', but got='%s'", tStore.ByID[id].task)
+	if tStore.ByID[id].Task != "Task-1st" {
+		t.Errorf("Expected TODO.task 'Task-1st', but got='%s'", tStore.ByID[id].Task)
 	}
 
 	// error
