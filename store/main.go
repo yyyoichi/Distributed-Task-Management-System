@@ -17,7 +17,7 @@ func main() {
 	sh := NewStoreHandler()
 
 	log.Println("start key-value store")
-	http.HandleFunc("/", sh.handler)
+	http.HandleFunc("/", sh.commandsHandler)
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Println(err)
 	}

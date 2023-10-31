@@ -19,7 +19,8 @@ func NewStoreHandler() StoreHandlers {
 	return StoreHandlers{store.NewStore()}
 }
 
-func (sh *StoreHandlers) handler(w http.ResponseWriter, r *http.Request) {
+func (sh *StoreHandlers) commandsHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("[KV] Call: commandsHandler")
 	var data struct {
 		Task string `json:"task" validate:"required"`
 	}

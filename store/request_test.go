@@ -16,7 +16,7 @@ func TestHandler(t *testing.T) {
 	validResp := httptest.NewRecorder()
 
 	// ハンドラを呼び出して正常なレスポンスを得る
-	tstore.handler(validResp, validReq)
+	tstore.commandsHandler(validResp, validReq)
 
 	// 正しいJSONデータの場合、200 OKのステータスコードを期待
 	if validResp.Code != http.StatusOK {
@@ -29,7 +29,7 @@ func TestHandler(t *testing.T) {
 	invalidResp := httptest.NewRecorder()
 
 	// ハンドラを呼び出して400 Bad Requestのレスポンスを得る
-	tstore.handler(invalidResp, invalidReq)
+	tstore.commandsHandler(invalidResp, invalidReq)
 
 	// 不正なJSONデータの場合、400 Bad Requestのステータスコードを期待
 	if invalidResp.Code != http.StatusBadRequest {
