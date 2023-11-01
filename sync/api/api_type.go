@@ -8,6 +8,7 @@ type SyncerInterface interface {
 	GetDifference(latestVersion int) DiffResponse
 	// 変更を同期する
 	Sync(nextVersion int, todo []store.TodoDateset) SyncResponse
+	Me() string
 }
 
 type DiffResponse struct {

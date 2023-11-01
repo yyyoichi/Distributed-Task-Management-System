@@ -1,6 +1,8 @@
 package api
 
-import "yyyoichi/Distributed-Task-Management-System/pkg/store"
+import (
+	"yyyoichi/Distributed-Task-Management-System/pkg/store"
+)
 
 func NewSyncerMock() *SyncerMock {
 	return &SyncerMock{store.NewStore()}
@@ -9,6 +11,8 @@ func NewSyncerMock() *SyncerMock {
 type SyncerMock struct {
 	*store.TStore
 }
+
+func (s *SyncerMock) Me() string { return "MockSyncer" }
 
 func (s *SyncerMock) GetDifference(latestVersion int) DiffResponse {
 	resp := DiffResponse{}
