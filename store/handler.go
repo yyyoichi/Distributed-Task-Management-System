@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 	"sync"
-	"yyyoichi/Distributed-Task-Management-System/store/store"
+	"yyyoichi/Distributed-Task-Management-System/pkg/store"
 )
 
 type StoreHandlers struct {
