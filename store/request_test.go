@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"yyyoichi/Distributed-Task-Management-System/pkg/store"
 )
 
 func TestHandler(t *testing.T) {
@@ -57,7 +58,7 @@ func TestHandler_differences(t *testing.T) {
 	if validResp.Code != http.StatusOK {
 		t.Errorf("Expected status code %d, but got %d", http.StatusOK, validResp.Code)
 	}
-	var data []todoDataset
+	var data []store.TodoDateset
 	if err := json.Unmarshal(validResp.Body.Bytes(), &data); err != nil {
 		t.Error(err)
 	}

@@ -44,14 +44,6 @@ func (sh *StoreHandlers) commandsHandler(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusOK)
 }
 
-type todoDataset struct {
-	ID        int    `json:"id"`
-	Task      string `json:"task"`
-	Completed bool   `json:"completed"`
-	Deleted   bool   `json:"deleted"`
-	Version   int    `json:"version"`
-}
-
 func (sh *StoreHandlers) differencesHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[KV] Call: differencesHandler")
 	var data struct {
@@ -66,9 +58,9 @@ func (sh *StoreHandlers) differencesHandler(w http.ResponseWriter, r *http.Reque
 
 	log.Printf("[KV] Get version '%d'\n", data.Version)
 
-	resp := []todoDataset{}
+	resp := []store.TodoDateset{}
 	for id, todo := range sh.s.GetLatestVersionTodo(data.Version) {
-		resp = append(resp, todoDataset{
+		resp = append(resp, store.TodoDateset{
 			ID:        id,
 			Task:      todo.Task,
 			Completed: todo.Completed,
@@ -94,8 +86,8 @@ func (sh *StoreHandlers) syncHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[KV] Call: syncHandler")
 	var data struct {
 		// 最大更新バージョン+1
-		NextVersion int           `json:"nextVersion" validate:"required"`
-		Todos       []todoDataset `json:"todos" validate:"required"`
+		NextVersion int                 `json:"nextVersion" validate:"required"`
+		Todos       []store.TodoDateset `json:"todos" validate:"required"`
 	}
 	if err := parseBody(r, &data); err != nil {
 		log.Println(err)
@@ -105,12 +97,12 @@ func (sh *StoreHandlers) syncHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var wg sync.WaitGroup
 
-	syncTodo := func(todos []todoDataset) {
+	syncTodo := func(todos []store.TodoDateset) {
 		defer wg.Done()
 		var todoWg sync.WaitGroup
 		todoWg.Add(len(todos))
 		for _, todo := range todos {
-			go func(t todoDataset) {
+			go func(t store.TodoDateset) {
 				defer todoWg.Done()
 				err := sh.s.SyncTodoAt(t.ID, store.Todo{
 					Task:      t.Task,
