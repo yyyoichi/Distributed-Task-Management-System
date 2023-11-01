@@ -11,7 +11,7 @@ import (
 )
 
 type StoreHandlers struct {
-	s store.TStore
+	s *store.TStore
 }
 
 func NewStoreHandler() StoreHandlers {
@@ -32,7 +32,7 @@ func (sh *StoreHandlers) commandsHandler(w http.ResponseWriter, r *http.Request)
 
 	log.Printf("[KV] Get cmds '%s'\n", data.Task)
 	cmds := strings.Split(data.Task, " ")
-	resp, err := sh.s.Read(cmds)
+	resp, err := Exec(cmds, sh.s)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
