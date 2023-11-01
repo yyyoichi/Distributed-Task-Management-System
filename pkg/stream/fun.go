@@ -1,0 +1,43 @@
+package stream
+
+import (
+	"context"
+	"runtime"
+	"sync"
+)
+
+func In[T interface{}](cxt context.Context, channels ...<-chan T) <-chan T {
+	var wg sync.WaitGroup
+	multiplexedCh := make(chan T)
+	multiplex := func(c <-chan T) {
+		defer wg.Done()
+		for i := range c {
+			select {
+			case <-cxt.Done():
+				return
+			case multiplexedCh <- i:
+			}
+		}
+	}
+
+	wg.Add(len(channels))
+	for _, c := range channels {
+		go multiplex(c)
+	}
+
+	go func() {
+		wg.Wait()
+		close(multiplexedCh)
+	}()
+
+	return multiplexedCh
+}
+
+func Out[T interface{}](cxt context.Context, fn func() <-chan T) []<-chan T {
+	num := runtime.NumCPU()
+	funOut := make([]<-chan T, num)
+	for i := 0; i < num; i++ {
+		funOut[i] = fn()
+	}
+	return funOut
+}
