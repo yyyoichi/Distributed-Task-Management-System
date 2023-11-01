@@ -29,3 +29,12 @@ func ConvertTodoDataset(id int, todo Todo) TodoDateset {
 		Version:   todo.Version,
 	}
 }
+
+func ConvertTodo(todoDataset TodoDateset) Todo {
+	return Todo{
+		Task:      todoDataset.Task,
+		Completed: todoDataset.Completed,
+		Deleted:   todoDataset.Deleted,
+		Version:   todoDataset.Version,
+	}
+}
