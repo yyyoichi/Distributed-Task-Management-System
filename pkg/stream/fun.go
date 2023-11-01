@@ -33,11 +33,11 @@ func In[T interface{}](cxt context.Context, channels ...<-chan T) <-chan T {
 	return multiplexedCh
 }
 
-func Out[T interface{}](cxt context.Context, fn func() <-chan T) []<-chan T {
+func Out[I interface{}, O interface{}](cxt context.Context, inCh <-chan I, fn func(I) O) []<-chan O {
 	num := runtime.NumCPU()
-	funOut := make([]<-chan T, num)
+	funOut := make([]<-chan O, num)
 	for i := 0; i < num; i++ {
-		funOut[i] = fn()
+		funOut[i] = Line[I, O](cxt, inCh, fn)
 	}
 	return funOut
 }
