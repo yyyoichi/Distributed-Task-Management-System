@@ -64,9 +64,8 @@ services:
     volumes:
       - ./sync:/workspace:cached
     environment:
-      - PORT=8801
-    ports:
-      - "8801:8801"
+      - STORES=store1:3316,store2:3326
+      - POLLING_MS=500
     tty: true
     command:
       - 'sh'
