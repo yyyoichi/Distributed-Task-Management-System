@@ -17,14 +17,7 @@ func NewStore() *TStore {
 type TStore struct {
 	mu          sync.Mutex
 	nextVersion int
-	ByID        map[int]*Todo
-}
-
-type Todo struct {
-	Task      string
-	Completed bool
-	Version   int
-	Deleted   bool
+	ByID        TodoKeyValueStore
 }
 
 func (s *TStore) Create(task string) int {
