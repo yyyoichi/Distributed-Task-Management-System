@@ -6,6 +6,11 @@ import (
 	"sync"
 )
 
+func FunIO[I interface{}, O interface{}](cxt context.Context, inCh <-chan I, fn func(I) O) <-chan O {
+	outCh := Out[I, O](cxt, inCh, fn)
+	return In[O](cxt, outCh...)
+}
+
 func In[T interface{}](cxt context.Context, channels ...<-chan T) <-chan T {
 	var wg sync.WaitGroup
 	multiplexedCh := make(chan T)
