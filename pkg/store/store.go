@@ -64,12 +64,12 @@ func (s *TStore) Delete(id int) error {
 	return nil
 }
 
-// [version]よりも大きいバージョンを持つTODOを返す
+// [version]**以上**のバージョンを持つTODOを返す
 func (s *TStore) GetLatestVersionTodo(version int) map[int]Todo {
 	todos := map[int]Todo{}
 	s.mu.Lock()
 	for id, todo := range s.ByID {
-		if version < todo.Version {
+		if version <= todo.Version {
 			todos[id] = *todo
 		}
 	}

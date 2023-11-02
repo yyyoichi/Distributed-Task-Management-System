@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"testing"
 )
 
@@ -97,12 +98,12 @@ func TestTStore_GetLatestVersionTodo(t *testing.T) {
 	}{
 		{
 			todos:          []string{"TaskA", "TaskB", "TaskC"},
-			tagetVersion:   2,
+			tagetVersion:   3,
 			expectedLength: 1,
 		},
 		{
 			todos:          []string{"TaskA"},
-			tagetVersion:   1,
+			tagetVersion:   2,
 			expectedLength: 0,
 		},
 	}
