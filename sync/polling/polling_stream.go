@@ -2,6 +2,7 @@ package polling
 
 import (
 	"context"
+	"yyyoichi/Distributed-Task-Management-System/pkg/store"
 	"yyyoichi/Distributed-Task-Management-System/pkg/stream"
 	"yyyoichi/Distributed-Task-Management-System/sync/api"
 )
@@ -26,6 +27,11 @@ type Differences struct {
 // 差分探知機から差分情報をパイプする
 func LineDetector2Differences(cxt context.Context, detectorCh <-chan DifferenceDetector, fn func(DifferenceDetector) Differences) <-chan Differences {
 	return stream.FunIO[DifferenceDetector, Differences](cxt, detectorCh, fn)
+}
+
+// 差分情報から複数のDatasetを送信する
+func DLineDifferences2Dataset(cxt context.Context, inCh <-chan Differences, fn func(d Differences, produce func(store.TodoDateset))) <-chan store.TodoDateset {
+	return stream.Demulti[Differences, store.TodoDateset](cxt, inCh, fn)
 }
 
 // 同期実行機
