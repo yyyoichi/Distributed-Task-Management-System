@@ -21,9 +21,9 @@ type Syncer struct {
 
 func (s *Syncer) Me() string { return fmt.Sprintf("Syncer[%s]", s.url) }
 
-// [latestVersion]よりも大きいバージョンを持つデータストア更新情報訪を[uri]から取得する
-func (s *Syncer) GetDifference(latestVersion int) DiffResponse {
-	reqBody := []byte(fmt.Sprintf(`{"version":%d`, latestVersion))
+// [currentVersion]以上のバージョンを持つデータストア差異情報を取得する
+func (s *Syncer) GetDifference(currentVersion int) DiffResponse {
+	reqBody := []byte(fmt.Sprintf(`{"version":%d`, currentVersion))
 	resp, err := http.Post(fmt.Sprintf("%s/differences", s.url), "application/json", bytes.NewBuffer(reqBody))
 	if err != nil {
 		return DiffResponse{Err: err}
