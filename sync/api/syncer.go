@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"yyyoichi/Distributed-Task-Management-System/pkg/store"
+
+	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/store"
 )
 
 func NewSyncer(url string) *Syncer {

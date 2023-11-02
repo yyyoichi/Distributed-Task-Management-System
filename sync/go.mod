@@ -1,3 +1,3 @@
-module yyyoichi/Distributed-Task-Management-System/sync
+module github.com/yyyoichi/Distributed-Task-Management-System/sync
 
 go 1.21.3

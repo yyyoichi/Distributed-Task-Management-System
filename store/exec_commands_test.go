@@ -3,7 +3,8 @@ package main
 import (
 	"errors"
 	"testing"
-	"yyyoichi/Distributed-Task-Management-System/pkg/store"
+
+	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/store"
 )
 
 func TestExecCommands(t *testing.T) {

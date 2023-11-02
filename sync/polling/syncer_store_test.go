@@ -3,7 +3,8 @@ package polling
 import (
 	"context"
 	"testing"
-	"yyyoichi/Distributed-Task-Management-System/sync/api"
+
+	"github.com/yyyoichi/Distributed-Task-Management-System/sync/api"
 )
 
 func TestSyncerStore(t *testing.T) {

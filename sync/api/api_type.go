@@ -1,6 +1,6 @@
 package api
 
-import "yyyoichi/Distributed-Task-Management-System/pkg/store"
+import "github.com/yyyoichi/Distributed-Task-Management-System/pkg/store"
 
 // 同期通信機。データ通信を行うために必要なメソッドを持つ。
 type SyncerInterface interface {

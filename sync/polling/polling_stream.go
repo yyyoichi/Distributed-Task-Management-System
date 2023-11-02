@@ -2,9 +2,10 @@ package polling
 
 import (
 	"context"
-	"yyyoichi/Distributed-Task-Management-System/pkg/store"
-	"yyyoichi/Distributed-Task-Management-System/pkg/stream"
-	"yyyoichi/Distributed-Task-Management-System/sync/api"
+
+	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/store"
+	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/stream"
+	"github.com/yyyoichi/Distributed-Task-Management-System/sync/api"
 )
 
 // 差分探知機

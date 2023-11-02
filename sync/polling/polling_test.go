@@ -4,8 +4,9 @@ import (
 	"context"
 	"log"
 	"testing"
-	"yyyoichi/Distributed-Task-Management-System/pkg/store"
-	"yyyoichi/Distributed-Task-Management-System/sync/api"
+
+	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/store"
+	"github.com/yyyoichi/Distributed-Task-Management-System/sync/api"
 )
 
 // テストシナリオ...複数データノードのポーリング同期をテストする。※データノードはmockで代替する。

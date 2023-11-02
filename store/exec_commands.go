@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"yyyoichi/Distributed-Task-Management-System/pkg/store"
+
+	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/store"
 )
 
 var (

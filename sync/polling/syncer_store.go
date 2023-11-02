@@ -2,8 +2,9 @@ package polling
 
 import (
 	"context"
-	"yyyoichi/Distributed-Task-Management-System/pkg/store"
-	"yyyoichi/Distributed-Task-Management-System/sync/api"
+
+	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/store"
+	"github.com/yyyoichi/Distributed-Task-Management-System/sync/api"
 )
 
 func NewSyncerStore(syncers ...api.SyncerInterface) SyncerStore {

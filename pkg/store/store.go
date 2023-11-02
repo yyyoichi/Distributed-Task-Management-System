@@ -5,7 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"sync"
-	"yyyoichi/Distributed-Task-Management-System/pkg/stream"
+
+	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/stream"
 )
 
 func NewStore() *TStore {

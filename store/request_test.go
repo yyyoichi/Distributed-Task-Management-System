@@ -6,7 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"yyyoichi/Distributed-Task-Management-System/pkg/store"
+
+	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/store"
 )
 
 func TestHandler(t *testing.T) {

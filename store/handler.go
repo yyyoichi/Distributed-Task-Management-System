@@ -6,7 +6,8 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"yyyoichi/Distributed-Task-Management-System/pkg/store"
+
+	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/store"
 )
 
 type StoreHandlers struct {

@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"yyyoichi/Distributed-Task-Management-System/pkg/store"
+
+	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/store"
 )
 
 func NewSyncerMock(name string) *SyncerMock {

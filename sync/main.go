@@ -8,7 +8,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"yyyoichi/Distributed-Task-Management-System/sync/polling"
+
+	"github.com/yyyoichi/Distributed-Task-Management-System/sync/polling"
 )
 
 var (
