@@ -5,12 +5,12 @@ import (
 	"yyyoichi/Distributed-Task-Management-System/sync/api"
 )
 
-func NewSyncerStore(urls []string) SyncerStore {
+func NewSyncerStore(syncers ...api.SyncerInterface) SyncerStore {
 	ss := SyncerStore{
-		byID: make(map[int]api.SyncerInterface, len(urls)),
+		byID: make(map[int]api.SyncerInterface, len(syncers)),
 	}
-	for id, url := range urls {
-		ss.byID[id] = api.NewSyncer(url)
+	for id, s := range syncers {
+		ss.byID[id] = s
 	}
 	return ss
 }
@@ -20,16 +20,16 @@ type SyncerStore struct {
 	byID map[int]api.SyncerInterface
 }
 
-// [syncerID]の同期機構を返す
-func (ss *SyncerStore) GetAt(syncerID int) api.SyncerInterface {
-	return ss.byID[syncerID]
+// Syncer情報を返す
+func (ss *SyncerStore) Who(syncerID int) string {
+	return ss.byID[syncerID].Me()
 }
 
 // 差分探知機を返す
-func (ss *SyncerStore) GetDifferenceDetectors(latestSyncVersion int) []DifferenceDetector {
-	dd := make([]DifferenceDetector, len(ss.byID))
+func (ss *SyncerStore) getDifferenceDetectors(latestSyncVersion int) []differenceDetector {
+	dd := make([]differenceDetector, len(ss.byID))
 	for id, syncer := range ss.byID {
-		dd = append(dd, DifferenceDetector{SyncerID: id, Get: func() api.DiffResponse {
+		dd = append(dd, differenceDetector{SyncerID: id, Get: func() api.DiffResponse {
 			return syncer.GetDifference(latestSyncVersion)
 		}})
 	}
@@ -37,10 +37,10 @@ func (ss *SyncerStore) GetDifferenceDetectors(latestSyncVersion int) []Differenc
 }
 
 // 同期実行機を返す
-func (ss *SyncerStore) GetSynchronizers(nextVersion int, todos []store.TodoDateset) []Synchronizer {
-	sn := make([]Synchronizer, len(ss.byID))
+func (ss *SyncerStore) getSynchronizers(nextVersion int, todos []store.TodoDateset) []synchronizer {
+	sn := make([]synchronizer, len(ss.byID))
 	for id, syncer := range ss.byID {
-		sn = append(sn, Synchronizer{SyncerID: id, Exec: func() api.SyncResponse {
+		sn = append(sn, synchronizer{SyncerID: id, Exec: func() api.SyncResponse {
 			return syncer.Sync(nextVersion, todos)
 		}})
 	}

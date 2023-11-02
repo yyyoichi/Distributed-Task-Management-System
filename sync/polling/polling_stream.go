@@ -8,50 +8,50 @@ import (
 )
 
 // 差分探知機
-type DifferenceDetector struct {
+type differenceDetector struct {
 	SyncerID int
 	Get      func() api.DiffResponse
 }
 
 // 差分探知機をジェネレータとして送信する
-func GenerateDifferenceDetector(cxt context.Context, detectors []DifferenceDetector) <-chan DifferenceDetector {
-	return stream.Generator[DifferenceDetector](cxt, detectors...)
+func generateDifferenceDetector(cxt context.Context, detectors []differenceDetector) <-chan differenceDetector {
+	return stream.Generator[differenceDetector](cxt, detectors...)
 }
 
 // 差分情報
-type Differences struct {
+type differences struct {
 	SyncerID     int
 	DiffResponse api.DiffResponse
 }
 
 // 差分探知機から差分情報をパイプする
-func LineDetector2Differences(cxt context.Context, detectorCh <-chan DifferenceDetector, fn func(DifferenceDetector) Differences) <-chan Differences {
-	return stream.FunIO[DifferenceDetector, Differences](cxt, detectorCh, fn)
+func lineDetector2Differences(cxt context.Context, detectorCh <-chan differenceDetector, fn func(differenceDetector) differences) <-chan differences {
+	return stream.FunIO[differenceDetector, differences](cxt, detectorCh, fn)
 }
 
 // 差分情報から複数のDatasetを送信する
-func DLineDifferences2Dataset(cxt context.Context, inCh <-chan Differences, fn func(d Differences, produce func(store.TodoDateset))) <-chan store.TodoDateset {
-	return stream.Demulti[Differences, store.TodoDateset](cxt, inCh, fn)
+func dLineDifferences2Dataset(cxt context.Context, inCh <-chan differences, fn func(d differences, produce func(store.TodoDateset))) <-chan store.TodoDateset {
+	return stream.Demulti[differences, store.TodoDateset](cxt, inCh, fn)
 }
 
 // 同期実行機
-type Synchronizer struct {
+type synchronizer struct {
 	SyncerID int
 	Exec     func() api.SyncResponse
 }
 
 // 同期実行機をジェネレータとして送信する
-func GenerateSyncronizer(cxt context.Context, synchronizers []Synchronizer) <-chan Synchronizer {
-	return stream.Generator[Synchronizer](cxt, synchronizers...)
+func generateSyncronizer(cxt context.Context, synchronizers []synchronizer) <-chan synchronizer {
+	return stream.Generator[synchronizer](cxt, synchronizers...)
 }
 
 // 同期結果情報
-type Dones struct {
+type dones struct {
 	SyncerID     int
 	SyncResponse api.SyncResponse
 }
 
 // 同期実行機から同期結果情報をパイプする
-func LineSynchronizer2Dones(cxt context.Context, synchronizerCh <-chan Synchronizer, fn func(Synchronizer) Dones) <-chan Dones {
-	return stream.FunIO[Synchronizer, Dones](cxt, synchronizerCh, fn)
+func lineSynchronizer2Dones(cxt context.Context, synchronizerCh <-chan synchronizer, fn func(synchronizer) dones) <-chan dones {
+	return stream.FunIO[synchronizer, dones](cxt, synchronizerCh, fn)
 }
