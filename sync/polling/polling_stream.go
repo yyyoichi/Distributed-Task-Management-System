@@ -13,9 +13,9 @@ type differenceDetector struct {
 	Get      func() api.DiffResponse
 }
 
-// 差分探知機をジェネレータとして送信する
-func generateDifferenceDetector(cxt context.Context, detectors []differenceDetector) <-chan differenceDetector {
-	return stream.Generator[differenceDetector](cxt, detectors...)
+// 差分探知機送信チャネルを作成する
+func generateDifferenceDetector(cxt context.Context, m map[int]api.SyncerInterface, fn func(k int, v api.SyncerInterface) differenceDetector) <-chan differenceDetector {
+	return stream.GeneratorWithMapIntKey[api.SyncerInterface, differenceDetector](cxt, m, fn)
 }
 
 // 差分情報
@@ -40,9 +40,9 @@ type synchronizer struct {
 	Exec     func() api.SyncResponse
 }
 
-// 同期実行機をジェネレータとして送信する
-func generateSyncronizer(cxt context.Context, synchronizers []synchronizer) <-chan synchronizer {
-	return stream.Generator[synchronizer](cxt, synchronizers...)
+// 同期実行機送信チャネルを作成する
+func generateSyncronizer(cxt context.Context, m map[int]api.SyncerInterface, fn func(k int, v api.SyncerInterface) synchronizer) <-chan synchronizer {
+	return stream.GeneratorWithMapIntKey[api.SyncerInterface, synchronizer](cxt, m, fn)
 }
 
 // 同期結果情報

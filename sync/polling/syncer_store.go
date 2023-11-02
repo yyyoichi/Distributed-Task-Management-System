@@ -1,6 +1,7 @@
 package polling
 
 import (
+	"context"
 	"yyyoichi/Distributed-Task-Management-System/pkg/store"
 	"yyyoichi/Distributed-Task-Management-System/sync/api"
 )
@@ -25,24 +26,28 @@ func (ss *SyncerStore) Who(syncerID int) string {
 	return ss.byID[syncerID].Me()
 }
 
-// 差分探知機を返す
-func (ss *SyncerStore) getDifferenceDetectors(latestSyncVersion int) []differenceDetector {
-	dd := make([]differenceDetector, len(ss.byID))
-	for id, syncer := range ss.byID {
-		dd = append(dd, differenceDetector{SyncerID: id, Get: func() api.DiffResponse {
-			return syncer.GetDifference(latestSyncVersion)
-		}})
-	}
-	return dd
+// 差分探知機チャネルを返す
+func (ss *SyncerStore) getDifferenceDetectorCh(cxt context.Context, currentSyncVersion int) <-chan differenceDetector {
+	return generateDifferenceDetector(cxt, ss.byID, func(k int, v api.SyncerInterface) differenceDetector {
+		detector := differenceDetector{
+			SyncerID: k,
+			Get: func() api.DiffResponse {
+				resp := v.GetDifference(currentSyncVersion)
+				return api.DiffResponse{TodoDatasets: resp.TodoDatasets, Err: resp.Err}
+			},
+		}
+		return detector
+	})
 }
 
 // 同期実行機を返す
-func (ss *SyncerStore) getSynchronizers(nextVersion int, todos []store.TodoDateset) []synchronizer {
-	sn := make([]synchronizer, len(ss.byID))
-	for id, syncer := range ss.byID {
-		sn = append(sn, synchronizer{SyncerID: id, Exec: func() api.SyncResponse {
-			return syncer.Sync(nextVersion, todos)
-		}})
-	}
-	return sn
+func (ss *SyncerStore) getSynchronizerCh(cxt context.Context, currentSyncVersion int, todos []store.TodoDateset) <-chan synchronizer {
+	return generateSyncronizer(cxt, ss.byID, func(k int, v api.SyncerInterface) synchronizer {
+		synchronizer := synchronizer{
+			SyncerID: k,
+			Exec: func() api.SyncResponse {
+				return v.Sync(currentSyncVersion, todos)
+			}}
+		return synchronizer
+	})
 }
