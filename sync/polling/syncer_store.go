@@ -45,8 +45,8 @@ func (ss *SyncerStore) getSynchronizerCh(cxt context.Context, currentSyncVersion
 	return generateSyncronizer(cxt, ss.byID, func(k int, v api.SyncerInterface) synchronizer {
 		synchronizer := synchronizer{
 			SyncerID: k,
-			Exec: func() api.SyncResponse {
-				return v.Sync(currentSyncVersion, todos)
+			Exec: func() api.SynchronizeResponse {
+				return v.Synchronize(currentSyncVersion, todos)
 			}}
 		return synchronizer
 	})

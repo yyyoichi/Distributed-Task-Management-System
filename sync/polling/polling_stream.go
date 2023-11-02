@@ -37,7 +37,7 @@ func dLineDifferences2Dataset(cxt context.Context, inCh <-chan differences, fn f
 // 同期実行機
 type synchronizer struct {
 	SyncerID int
-	Exec     func() api.SyncResponse
+	Exec     func() api.SynchronizeResponse
 }
 
 // 同期実行機送信チャネルを作成する
@@ -47,8 +47,8 @@ func generateSyncronizer(cxt context.Context, m map[int]api.SyncerInterface, fn 
 
 // 同期結果情報
 type dones struct {
-	SyncerID     int
-	SyncResponse api.SyncResponse
+	SyncerID            int
+	SynchronizeResponse api.SynchronizeResponse
 }
 
 // 同期実行機から同期結果情報をパイプする

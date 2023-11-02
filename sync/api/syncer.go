@@ -40,7 +40,7 @@ func (s *Syncer) GetDifference(currentVersion int) DiffResponse {
 }
 
 // 同期を実行する
-func (s *Syncer) Sync(currentVersion int, todos []store.TodoDateset) SyncResponse {
+func (s *Syncer) Synchronize(currentVersion int, todos []store.TodoDateset) SynchronizeResponse {
 	reqBody, err := json.Marshal(struct {
 		Version int                 `json:"version"`
 		Todos   []store.TodoDateset `json:"todos"`
@@ -49,13 +49,13 @@ func (s *Syncer) Sync(currentVersion int, todos []store.TodoDateset) SyncRespons
 		Todos:   todos,
 	})
 	if err != nil {
-		return SyncResponse{err}
+		return SynchronizeResponse{err}
 	}
 
 	resp, err := http.Post(fmt.Sprintf("%s/sync", s.url), "application/json", bytes.NewBuffer(reqBody))
 	if err != nil {
-		return SyncResponse{err}
+		return SynchronizeResponse{err}
 	}
 	defer resp.Body.Close()
-	return SyncResponse{nil}
+	return SynchronizeResponse{nil}
 }

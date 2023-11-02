@@ -2,22 +2,25 @@ package api
 
 import "yyyoichi/Distributed-Task-Management-System/pkg/store"
 
-// データ通信を行うために必要なメソッドを持つ
+// 同期通信機。データ通信を行うために必要なメソッドを持つ。
 type SyncerInterface interface {
-	// 前回更新時[latestVersion]移行の変更を取得する
-	GetDifference(latestVersion int) DiffResponse
-	// 変更を同期する
-	// - [currentVersion]今回の同期バージョン。
+	// 差分情報をリクエストする
+	// [currentSyncVersion]以降の変更を取得する
+	GetDifference(currentSyncVersion int) DiffResponse
+	// 同期実行をリクエストする
+	// - [currentSyncVersion]今回の同期バージョン。
 	// - [todos]同期内容
-	Sync(currentVersion int, todo []store.TodoDateset) SyncResponse
+	Synchronize(currentSyncVersion int, todo []store.TodoDateset) SynchronizeResponse
 	Me() string
 }
 
+// 差分検知レスポンス
 type DiffResponse struct {
 	Err          error
 	TodoDatasets []store.TodoDateset
 }
 
-type SyncResponse struct {
+// 同期実行レスポンス
+type SynchronizeResponse struct {
 	Err error
 }

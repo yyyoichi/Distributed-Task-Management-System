@@ -81,7 +81,7 @@ func (pm *PollingManager) Polling(cxt context.Context) {
 	// step.2 同期実行機で同期結果情報を取得する //
 	doneCh := lineSynchronizer2Dones(c, synchronizerCh, func(s synchronizer) dones {
 		resp := s.Exec()
-		return dones{SyncerID: s.SyncerID, SyncResponse: resp}
+		return dones{SyncerID: s.SyncerID, SynchronizeResponse: resp}
 	})
 	for range doneCh {
 		// TODO error handling

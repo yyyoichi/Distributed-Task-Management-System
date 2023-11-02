@@ -31,7 +31,7 @@ func (s *SyncerMock) GetDifference(currentSyncVersion int) DiffResponse {
 	return resp
 }
 
-func (s *SyncerMock) Sync(currentVersion int, todos []store.TodoDateset) SyncResponse {
+func (s *SyncerMock) Synchronize(currentVersion int, todos []store.TodoDateset) SynchronizeResponse {
 	s.TStore.Sync(context.Background(), currentVersion, todos)
-	return SyncResponse{nil}
+	return SynchronizeResponse{nil}
 }
