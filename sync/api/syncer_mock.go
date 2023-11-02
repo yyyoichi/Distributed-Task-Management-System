@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"log"
 	"yyyoichi/Distributed-Task-Management-System/pkg/store"
 )
 
@@ -15,11 +16,16 @@ type SyncerMock struct {
 	*store.TStore
 }
 
-func (s *SyncerMock) Me() string { return fmt.Sprintf("SyncerMock[%s]", s.name) }
+func (s *SyncerMock) Me() string {
+	return fmt.Sprintf("SyncerMock[%s]: Key-Value-Store has %d itmes", s.name, len(s.ByID))
+}
 
-func (s *SyncerMock) GetDifference(latestVersion int) DiffResponse {
+func (s *SyncerMock) GetDifference(currentSyncVersion int) DiffResponse {
 	resp := DiffResponse{}
-	for id, todo := range s.GetLatestVersionTodo(latestVersion) {
+
+	todos := s.TStore.GetLatestVersionTodo(currentSyncVersion)
+	log.Printf("\t[%s] There are %d Todos(/%d) defferenced from v%d", s.name, len(todos), len(s.TStore.ByID), currentSyncVersion)
+	for id, todo := range todos {
 		resp.TodoDatasets = append(resp.TodoDatasets, store.ConvertTodoDataset(id, todo))
 	}
 	return resp
