@@ -7,7 +7,9 @@ type SyncerInterface interface {
 	// 前回更新時[latestVersion]移行の変更を取得する
 	GetDifference(latestVersion int) DiffResponse
 	// 変更を同期する
-	Sync(nextVersion int, todo []store.TodoDateset) SyncResponse
+	// - [currentVersion]今回の同期バージョン。
+	// - [todos]同期内容
+	Sync(currentVersion int, todo []store.TodoDateset) SyncResponse
 	Me() string
 }
 

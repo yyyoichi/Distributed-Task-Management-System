@@ -1,9 +1,11 @@
 package store
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"sync"
+	"yyyoichi/Distributed-Task-Management-System/pkg/stream"
 )
 
 func NewStore() *TStore {
@@ -75,22 +77,24 @@ func (s *TStore) GetLatestVersionTodo(version int) map[int]Todo {
 	return todos
 }
 
-// 更新バージョンを同期する
-func (s *TStore) SyncNextVersion(newVersion int) {
-	s.nextVersion = newVersion
-}
-
-// データを上書きする。
-func (s *TStore) SyncTodoAt(id int, newTodo Todo) error {
+// 同期を実行する
+// [currentSyncVersion]今回の同期バージョン, [todos]同期するTodoDataset
+func (s *TStore) Sync(cxt context.Context, currentSyncVersion int, todos []TodoDateset) {
 	s.mu.Lock()
-	_, found := s.ByID[id]
-	if !found {
-		err := fmt.Sprintf("not found TODO[ID:%d]", id)
-		return errors.New(err)
+	defer s.mu.Unlock()
+
+	// TASK.1 sync TODO
+	todoCh := stream.Generator[TodoDateset](cxt, todos...)
+	doneCh := stream.FunIO[TodoDateset, interface{}](cxt, todoCh, func(td TodoDateset) interface{} {
+		todo := ConvertTodo(td)
+		s.ByID[td.ID] = &todo
+		return nil
+	})
+	// doneChが終わるまで待機
+	for range doneCh {
 	}
-	s.ByID[id] = &newTodo
-	s.mu.Unlock()
-	return nil
+	// TASK.2 sync nextSyncVersion
+	s.nextVersion = currentSyncVersion + 1
 }
 
 func (s *TStore) nextID() int {

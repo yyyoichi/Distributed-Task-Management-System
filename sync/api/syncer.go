@@ -40,13 +40,13 @@ func (s *Syncer) GetDifference(latestVersion int) DiffResponse {
 }
 
 // 同期を実行する
-func (s *Syncer) Sync(nextVersion int, todos []store.TodoDateset) SyncResponse {
+func (s *Syncer) Sync(currentVersion int, todos []store.TodoDateset) SyncResponse {
 	reqBody, err := json.Marshal(struct {
-		NextVersion int                 `json:"nextVersion"`
-		Todos       []store.TodoDateset `json:"todos"`
+		Version int                 `json:"version"`
+		Todos   []store.TodoDateset `json:"todos"`
 	}{
-		NextVersion: nextVersion,
-		Todos:       todos,
+		Version: currentVersion,
+		Todos:   todos,
 	})
 	if err != nil {
 		return SyncResponse{err}

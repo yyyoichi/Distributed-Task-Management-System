@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"yyyoichi/Distributed-Task-Management-System/pkg/store"
 )
 
@@ -22,10 +23,7 @@ func (s *SyncerMock) GetDifference(latestVersion int) DiffResponse {
 	return resp
 }
 
-func (s *SyncerMock) Sync(nextVersion int, todos []store.TodoDateset) SyncResponse {
-	s.SyncNextVersion(nextVersion)
-	for _, dataset := range todos {
-		s.SyncTodoAt(dataset.ID, store.ConvertTodo(dataset))
-	}
+func (s *SyncerMock) Sync(currentVersion int, todos []store.TodoDateset) SyncResponse {
+	s.TStore.Sync(context.Background(), currentVersion, todos)
 	return SyncResponse{nil}
 }

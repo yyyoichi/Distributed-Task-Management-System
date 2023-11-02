@@ -121,33 +121,33 @@ func TestTStore_GetLatestVersionTodo(t *testing.T) {
 
 func TestTStore_SyncTodoAt(t *testing.T) {
 	tStore := NewStore()
-	id := tStore.Create("TaskA")
+	id := tStore.Create("TaskA")  // version 1
+	tStore.Update(id, true)       // version 2
+	id2 := tStore.Create("TaskB") // version 3
+	// now
+	// ID:1 version:2 TaskA completed
+	// ID 2 version:3 TaskB no-complete
 
-	// sync
-	todo := Todo{
-		Task:      "Task-1st",
+	// sync version 1
+	syncVersion := 1
+	// sync todo (update no-completed)
+	todo := []TodoDateset{{
+		ID:        1,
+		Task:      "TaskA",
 		Completed: false,
 		Deleted:   false,
-		Version:   100,
-	}
-	if err := tStore.SyncTodoAt(id, todo); err != nil {
-		t.Error(err)
-	}
+		Version:   1,
+	}}
+	// exec
+	tStore.Sync(context.Background(), syncVersion, todo)
 
-	if tStore.ByID[id].Task != "Task-1st" {
-		t.Errorf("Expected TODO.task 'Task-1st', but got='%s'", tStore.ByID[id].Task)
+	if tStore.ByID[id].Completed {
+		t.Error("Expected completed: false, but got: true")
 	}
-
-	// error
-	if err := tStore.SyncTodoAt(9999, todo); err == nil {
-		t.Errorf("Expected error is not nil, but got='nil'")
+	if tStore.ByID[id].Version != 1 {
+		t.Errorf("Expected Version is 1, but got='%d'", tStore.ByID[id].Version)
 	}
-}
-
-func TestTStore_SyncNextVersion(t *testing.T) {
-	tStore := NewStore()
-	tStore.SyncNextVersion(100)
-	if tStore.nextVersion != 100 {
-		t.Errorf("Expected nextVersion is 100, but got='%d'", tStore.nextVersion)
+	if tStore.ByID[id2].Version != 3 {
+		t.Errorf("Expected Version is 3, but got='%d'", tStore.ByID[id].Version)
 	}
 }

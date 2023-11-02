@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -72,14 +71,24 @@ func TestHandler_sync(t *testing.T) {
 	// init data
 	sh.s.Create("TaskA") // ID1 version1
 	sh.s.Create("TaskB") // ID2 version2
+	// now
+	// ID1 version1 TaskA no-complete
+	// ID2 version2 TaskB no-complete
 
 	// sh.s.Update(1, true)
-	validJSON := `{"NextVersion":4,"todos":[{"id":2,"task":"TaskB","completed":true,"deleted":false,"version":3}]}`
+	validJSON := `{"Version":1,"todos":[
+		{"id":1,"task":"TaskA","completed":true,"deleted":false,"version":1},
+		{"id":2,"task":"TaskB","completed":true,"deleted":false,"version":1}
+		]}`
 	validReq, _ := http.NewRequest("POST", "/", bytes.NewBufferString(validJSON))
 	validResp := httptest.NewRecorder()
 
 	// ハンドラを呼び出して正常なレスポンスを得る
 	sh.syncHandler(validResp, validReq)
+
+	// now
+	// ID1 version1 TaskA completed
+	// ID2 version1 TaskB completed
 
 	// 正しいJSONデータの場合、200 OKのステータスコードを期待
 	if validResp.Code != http.StatusOK {
@@ -91,12 +100,16 @@ func TestHandler_sync(t *testing.T) {
 	}
 
 	sh.s.Create("TaskC")
-	log.Println("Create New TODO")
+	// now
+	// ID1 version1 TaskA completed
+	// ID2 version1 TaskB completed
+	// ID3 version2 TaskC no-complete
+
 	todo, found := sh.s.ByID[3]
 	if !found {
 		t.Error("Expected to find TODO[ID:3], but it was not found")
 	}
-	if todo.Version != 4 {
-		t.Errorf("Expected Version is 4, but got='%d'", todo.Version)
+	if todo.Version != 2 {
+		t.Errorf("Expected Version is 2, but got='%d'", todo.Version)
 	}
 }

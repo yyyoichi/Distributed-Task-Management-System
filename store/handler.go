@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"sync"
 	"yyyoichi/Distributed-Task-Management-System/pkg/store"
 )
 
@@ -47,6 +46,7 @@ func (sh *StoreHandlers) commandsHandler(w http.ResponseWriter, r *http.Request)
 func (sh *StoreHandlers) differencesHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[KV] Call: differencesHandler")
 	var data struct {
+		// 同期バージョン
 		Version int `json:"version" validate:"required"`
 	}
 	if err := parseBody(r, &data); err != nil {
@@ -85,9 +85,9 @@ func (sh *StoreHandlers) differencesHandler(w http.ResponseWriter, r *http.Reque
 func (sh *StoreHandlers) syncHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[KV] Call: syncHandler")
 	var data struct {
-		// 最大更新バージョン+1
-		NextVersion int                 `json:"nextVersion" validate:"required"`
-		Todos       []store.TodoDateset `json:"todos" validate:"required"`
+		// 同期バージョン
+		Version int                 `json:"version" validate:"required"`
+		Todos   []store.TodoDateset `json:"todos" validate:"required"`
 	}
 	if err := parseBody(r, &data); err != nil {
 		log.Println(err)
@@ -95,38 +95,8 @@ func (sh *StoreHandlers) syncHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(bytes.NewBufferString(err.Error()).Bytes())
 		return
 	}
-	var wg sync.WaitGroup
+	sh.s.Sync(r.Context(), data.Version, data.Todos)
 
-	syncTodo := func(todos []store.TodoDateset) {
-		defer wg.Done()
-		var todoWg sync.WaitGroup
-		todoWg.Add(len(todos))
-		for _, todo := range todos {
-			go func(t store.TodoDateset) {
-				defer todoWg.Done()
-				err := sh.s.SyncTodoAt(t.ID, store.Todo{
-					Task:      t.Task,
-					Completed: t.Completed,
-					Deleted:   t.Deleted,
-					Version:   t.Version,
-				})
-				if err != nil {
-					log.Println(err.Error())
-				}
-			}(todo)
-		}
-		todoWg.Wait()
-	}
-
-	syncVersion := func(nextVersion int) {
-		defer wg.Done()
-		sh.s.SyncNextVersion(nextVersion)
-	}
-
-	wg.Add(2)
-	go syncTodo(data.Todos)
-	go syncVersion(data.NextVersion)
-	wg.Wait()
 	log.Println("[KV] Response 200")
 	w.WriteHeader(http.StatusOK)
 }
