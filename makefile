@@ -23,9 +23,9 @@ start-%:
 stop:
 	docker-compose stop
 stop-%:
-	docker-compse stop ${@:stop-%=%}
+	docker-compose stop ${@:stop-%=%}
 
 rm:
-	docker-compse rm 
+	docker-compose rm 
 rm-%:
-	docker-compse rm ${@:rm-%=%}
+	docker-compose rm ${@:rm-%=%}
