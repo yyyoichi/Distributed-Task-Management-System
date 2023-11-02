@@ -2,7 +2,10 @@ module github.com/yyyoichi/Distributed-Task-Management-System/store
 
 go 1.21.3
 
-require github.com/go-playground/validator v9.31.0+incompatible
+require (
+	github.com/go-playground/validator v9.31.0+incompatible
+	github.com/yyyoichi/Distributed-Task-Management-System v0.0.0-20231102094638-fd546e26876b
+)
 
 require (
 	github.com/go-playground/locales v0.14.1 // indirect
