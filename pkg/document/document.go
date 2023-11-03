@@ -1,4 +1,4 @@
-package store
+package document
 
 import (
 	"context"
@@ -80,13 +80,13 @@ func (s *TStore) GetLatestVersionTodo(version int) map[int]Todo {
 
 // 同期を実行する
 // [currentSyncVersion]今回の同期バージョン, [todos]同期するTodoDataset
-func (s *TStore) Sync(cxt context.Context, currentSyncVersion int, todos []TodoDateset) {
+func (s *TStore) Sync(cxt context.Context, currentSyncVersion int, todos []TodoDataset) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	// TASK.1 sync TODO
-	todoCh := stream.Generator[TodoDateset](cxt, todos...)
-	doneCh := stream.FunIO[TodoDateset, interface{}](cxt, todoCh, func(td TodoDateset) interface{} {
+	todoCh := stream.Generator[TodoDataset](cxt, todos...)
+	doneCh := stream.FunIO[TodoDataset, interface{}](cxt, todoCh, func(td TodoDataset) interface{} {
 		todo := ConvertTodo(td)
 		s.ByID[td.ID] = &todo
 		return nil

@@ -1,4 +1,4 @@
-package store
+package document
 
 // キーバリューストア型 IDをキーとする
 type TodoKeyValueStore map[int]*Todo
@@ -11,7 +11,7 @@ type Todo struct {
 }
 
 // IDを含んだデータ型
-type TodoDateset struct {
+type TodoDataset struct {
 	ID        int    `json:"id"`
 	Task      string `json:"task"`
 	Completed bool   `json:"completed"`
@@ -20,8 +20,8 @@ type TodoDateset struct {
 }
 
 // Todo型をTodoDatasetに変換する
-func ConvertTodoDataset(id int, todo Todo) TodoDateset {
-	return TodoDateset{
+func ConvertTodoDataset(id int, todo Todo) TodoDataset {
+	return TodoDataset{
 		ID:        id,
 		Task:      todo.Task,
 		Completed: todo.Completed,
@@ -30,7 +30,7 @@ func ConvertTodoDataset(id int, todo Todo) TodoDateset {
 	}
 }
 
-func ConvertTodo(todoDataset TodoDateset) Todo {
+func ConvertTodo(todoDataset TodoDataset) Todo {
 	return Todo{
 		Task:      todoDataset.Task,
 		Completed: todoDataset.Completed,
