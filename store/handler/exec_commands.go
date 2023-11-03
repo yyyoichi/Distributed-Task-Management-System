@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	store "github.com/yyyoichi/Distributed-Task-Management-System/pkg/database"
+	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/document"
 )
 
 var (
@@ -16,7 +16,7 @@ var (
 	ErrNoDataFound         = errors.New("sql error: no data found")
 )
 
-func Exec(commands []string, s *store.TStore) (string, error) {
+func Exec(commands []string, dc *document.TDocument) (string, error) {
 	var resp string
 	switch commands[0] {
 	case "create":
@@ -24,12 +24,12 @@ func Exec(commands []string, s *store.TStore) (string, error) {
 			err := fmt.Sprintf("%s: create cmd required 1 arg", ErrSyntaxInvalidArgs)
 			return "", errors.New(err)
 		}
-		id := s.Create(commands[1])
+		id := dc.Create(commands[1])
 		resp = fmt.Sprintf("Created TODO[ID:%d]", id)
 	case "list":
 		list := []string{"TODO: "}
 		cmps := []string{"COMPLETED TODO:"}
-		for id, todo := range s.ByID {
+		for id, todo := range dc.ByID {
 			s := fmt.Sprintf("%d: %s", id, todo.Task)
 			if todo.Completed {
 				cmps = append(cmps, s)
@@ -52,7 +52,7 @@ func Exec(commands []string, s *store.TStore) (string, error) {
 			err := fmt.Sprintf("%s: third argument must be 'complete' or 'open'", ErrSyntaxInvalidArgs)
 			return "", errors.New(err)
 		}
-		if err := s.Update(id, commands[2] == "complete"); err != nil {
+		if err := dc.Update(id, commands[2] == "complete"); err != nil {
 			return "", fmt.Errorf("%s: %s", ErrNoDataFound, err)
 		}
 		resp = fmt.Sprintf("Updated TODO[ID:%d]", id)
@@ -66,7 +66,7 @@ func Exec(commands []string, s *store.TStore) (string, error) {
 			err := fmt.Sprintf("%s: second argument must be a number", ErrSyntaxInvalidArgs)
 			return "", errors.New(err)
 		}
-		if err := s.Delete(id); err != nil {
+		if err := dc.Delete(id); err != nil {
 			err := fmt.Errorf("%s: %s", ErrNoDataFound, err)
 			return "", err
 		}

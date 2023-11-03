@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/yyyoichi/Distributed-Task-Management-System/store/handler"
 )
 
 func main() {
@@ -14,12 +16,12 @@ func main() {
 	}
 	addr := fmt.Sprintf(":%s", port)
 
-	sh := NewStoreHandler()
+	sh := handler.NewStoreHandler()
 
 	log.Println("start key-value store")
-	http.HandleFunc("/differences", sh.differencesHandler)
-	http.HandleFunc("/sync", sh.syncHandler)
-	http.HandleFunc("/", sh.commandsHandler)
+	http.HandleFunc("/differences", sh.DifferencesHandler)
+	http.HandleFunc("/sync", sh.SynchronizeHandler)
+	http.HandleFunc("/", sh.CommandsHandler)
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Println(err)
 	}

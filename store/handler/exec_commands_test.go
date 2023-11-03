@@ -1,14 +1,14 @@
-package main
+package handler
 
 import (
 	"errors"
 	"testing"
 
-	store "github.com/yyyoichi/Distributed-Task-Management-System/pkg/database"
+	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/document"
 )
 
 func TestExecCommands(t *testing.T) {
-	tStore := store.NewStore()
+	tDocument := document.NewTDocument()
 
 	tests := []struct {
 		cmds     []string
@@ -35,7 +35,7 @@ func TestExecCommands(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		resp, err := Exec(test.cmds, tStore)
+		resp, err := Exec(test.cmds, tDocument)
 		if err != nil && err.Error() != test.err.Error() {
 			t.Errorf("For commands %v, expected error: %v, but got: %v", test.cmds, test.err, err)
 		}

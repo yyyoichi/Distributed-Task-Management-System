@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"bytes"
@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	store "github.com/yyyoichi/Distributed-Task-Management-System/pkg/database"
+	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/document"
 )
 
 func TestHandler(t *testing.T) {
@@ -19,7 +19,7 @@ func TestHandler(t *testing.T) {
 	validResp := httptest.NewRecorder()
 
 	// ハンドラを呼び出して正常なレスポンスを得る
-	tstore.commandsHandler(validResp, validReq)
+	tstore.CommandsHandler(validResp, validReq)
 
 	// 正しいJSONデータの場合、200 OKのステータスコードを期待
 	if validResp.Code != http.StatusOK {
@@ -32,7 +32,7 @@ func TestHandler(t *testing.T) {
 	invalidResp := httptest.NewRecorder()
 
 	// ハンドラを呼び出して400 Bad Requestのレスポンスを得る
-	tstore.commandsHandler(invalidResp, invalidReq)
+	tstore.CommandsHandler(invalidResp, invalidReq)
 
 	// 不正なJSONデータの場合、400 Bad Requestのステータスコードを期待
 	if invalidResp.Code != http.StatusBadRequest {
@@ -43,22 +43,22 @@ func TestHandler(t *testing.T) {
 func TestHandler_differences(t *testing.T) {
 	sh := NewStoreHandler()
 	// init data
-	sh.s.Create("TaskA") // ID1 version1
-	sh.s.Create("TaskB") // ID2 version2
-	sh.s.Update(1, true) // version3
+	sh.dc.Create("TaskA") // ID1 version1
+	sh.dc.Create("TaskB") // ID2 version2
+	sh.dc.Update(1, true) // version3
 
 	validJSON := `{"version": 1}`
 	validReq, _ := http.NewRequest("POST", "/", bytes.NewBufferString(validJSON))
 	validResp := httptest.NewRecorder()
 
 	// ハンドラを呼び出して正常なレスポンスを得る
-	sh.differencesHandler(validResp, validReq)
+	sh.DifferencesHandler(validResp, validReq)
 
 	// 正しいJSONデータの場合、200 OKのステータスコードを期待
 	if validResp.Code != http.StatusOK {
 		t.Errorf("Expected status code %d, but got %d", http.StatusOK, validResp.Code)
 	}
-	var data []store.TodoDateset
+	var data []document.TodoDataset
 	if err := json.Unmarshal(validResp.Body.Bytes(), &data); err != nil {
 		t.Error(err)
 	}
@@ -70,13 +70,13 @@ func TestHandler_differences(t *testing.T) {
 func TestHandler_sync(t *testing.T) {
 	sh := NewStoreHandler()
 	// init data
-	sh.s.Create("TaskA") // ID1 version1
-	sh.s.Create("TaskB") // ID2 version2
+	sh.dc.Create("TaskA") // ID1 version1
+	sh.dc.Create("TaskB") // ID2 version2
 	// now
 	// ID1 version1 TaskA no-complete
 	// ID2 version2 TaskB no-complete
 
-	// sh.s.Update(1, true)
+	// sh.dc.Update(1, true)
 	validJSON := `{"Version":1,"todos":[
 		{"id":1,"task":"TaskA","completed":true,"deleted":false,"version":1},
 		{"id":2,"task":"TaskB","completed":true,"deleted":false,"version":1}
@@ -85,7 +85,7 @@ func TestHandler_sync(t *testing.T) {
 	validResp := httptest.NewRecorder()
 
 	// ハンドラを呼び出して正常なレスポンスを得る
-	sh.syncHandler(validResp, validReq)
+	sh.SynchronizeHandler(validResp, validReq)
 
 	// now
 	// ID1 version1 TaskA completed
@@ -95,18 +95,18 @@ func TestHandler_sync(t *testing.T) {
 	if validResp.Code != http.StatusOK {
 		t.Errorf("Expected status code %d, but got %d", http.StatusOK, validResp.Code)
 	}
-	todo := sh.s.ByID[2]
+	todo := sh.dc.ByID[2]
 	if !todo.Completed {
 		t.Error("Expected completed is true, but got='false'")
 	}
 
-	sh.s.Create("TaskC")
+	sh.dc.Create("TaskC")
 	// now
 	// ID1 version1 TaskA completed
 	// ID2 version1 TaskB completed
 	// ID3 version2 TaskC no-complete
 
-	todo, found := sh.s.ByID[3]
+	todo, found := sh.dc.ByID[3]
 	if !found {
 		t.Error("Expected to find TODO[ID:3], but it was not found")
 	}

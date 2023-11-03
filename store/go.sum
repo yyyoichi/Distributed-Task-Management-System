@@ -18,8 +18,8 @@ github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
 github.com/stretchr/testify v1.8.2 h1:+h33VjcLVPDHtOdpUCuF+7gSuG3yGIftsP1YvFihtJ8=
 github.com/stretchr/testify v1.8.2/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
-github.com/yyyoichi/Distributed-Task-Management-System v0.0.0-20231102094638-fd546e26876b h1:4Gamb5XgjQh3INaXFM8SOmvr912xYRZ+jAGo93fyS8E=
-github.com/yyyoichi/Distributed-Task-Management-System v0.0.0-20231102094638-fd546e26876b/go.mod h1:eFJFlDMLBB+Xi3GnH4chMMF6tFRqczRAzMAoFv8RadY=
+github.com/yyyoichi/Distributed-Task-Management-System v0.0.0-20231103010610-13ebcf55e31e h1:iGzPZaglYKOwOJnVXDjn/TczKAzM4tZwwgWqaRxgMPc=
+github.com/yyyoichi/Distributed-Task-Management-System v0.0.0-20231103010610-13ebcf55e31e/go.mod h1:eFJFlDMLBB+Xi3GnH4chMMF6tFRqczRAzMAoFv8RadY=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/go-playground/assert.v1 v1.2.1 h1:xoYuJVE7KT85PYWrN730RguIQO0ePzVRfFMXadIrXTM=
 gopkg.in/go-playground/assert.v1 v1.2.1/go.mod h1:9RXL0bg/zibRAgZUYszZSwO/z8Y/a8bDuhia5mkpMnE=
