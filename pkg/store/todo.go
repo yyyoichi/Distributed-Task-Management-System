@@ -1,8 +1,5 @@
 package store
 
-// キーバリューストア型 IDをキーとする
-type TodoKeyValueStore map[int]*Todo
-
 type Todo struct {
 	Task      string
 	Completed bool

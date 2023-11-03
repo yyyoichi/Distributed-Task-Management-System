@@ -9,98 +9,98 @@ import (
 	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/stream"
 )
 
-func NewStore() *TStore {
-	return &TStore{
+func NewTDocument() *TDocument {
+	return &TDocument{
 		mu:          sync.Mutex{},
 		ByID:        make(map[int]*Todo),
 		nextVersion: 1,
 	}
 }
 
-type TStore struct {
+type TDocument struct {
 	mu          sync.Mutex
 	nextVersion int
-	ByID        TodoKeyValueStore
+	ByID        map[int]*Todo
 }
 
-func (s *TStore) Create(task string) int {
-	s.mu.Lock()
-	id := s.nextID()
-	s.ByID[id] = &Todo{
+func (dc *TDocument) Create(task string) int {
+	dc.mu.Lock()
+	id := dc.nextID()
+	dc.ByID[id] = &Todo{
 		Task:      task,
 		Completed: false,
 		Deleted:   false,
-		Version:   s.nextVersion,
+		Version:   dc.nextVersion,
 	}
-	s.nextVersion++
-	s.mu.Unlock()
+	dc.nextVersion++
+	dc.mu.Unlock()
 	return id
 }
 
-func (s *TStore) Update(id int, completed bool) error {
-	s.mu.Lock()
-	todo, found := s.ByID[id]
+func (dc *TDocument) Update(id int, completed bool) error {
+	dc.mu.Lock()
+	todo, found := dc.ByID[id]
 	if !found {
 		err := fmt.Sprintf("not found TODO[ID:%d]", id)
 		return errors.New(err)
 	}
 	todo.Completed = completed
-	todo.Version = s.nextVersion
-	s.nextVersion++
-	s.mu.Unlock()
+	todo.Version = dc.nextVersion
+	dc.nextVersion++
+	dc.mu.Unlock()
 	return nil
 }
 
-func (s *TStore) Delete(id int) error {
-	s.mu.Lock()
-	todo, found := s.ByID[id]
+func (dc *TDocument) Delete(id int) error {
+	dc.mu.Lock()
+	todo, found := dc.ByID[id]
 	if !found {
 		err := fmt.Sprintf("not found TODO[ID:%d]", id)
 		return errors.New(err)
 	}
 	todo.Deleted = true
-	todo.Version = s.nextVersion
-	s.nextVersion++
-	s.mu.Unlock()
+	todo.Version = dc.nextVersion
+	dc.nextVersion++
+	dc.mu.Unlock()
 	return nil
 }
 
 // [version]**以上**のバージョンを持つTODOを返す
-func (s *TStore) GetLatestVersionTodo(version int) map[int]Todo {
+func (dc *TDocument) GetLatestVersionTodo(version int) map[int]Todo {
 	todos := map[int]Todo{}
-	s.mu.Lock()
-	for id, todo := range s.ByID {
+	dc.mu.Lock()
+	for id, todo := range dc.ByID {
 		if version <= todo.Version {
 			todos[id] = *todo
 		}
 	}
-	s.mu.Unlock()
+	dc.mu.Unlock()
 	return todos
 }
 
 // 同期を実行する
 // [currentSyncVersion]今回の同期バージョン, [todos]同期するTodoDataset
-func (s *TStore) Sync(cxt context.Context, currentSyncVersion int, todos []TodoDateset) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+func (dc *TDocument) Sync(cxt context.Context, currentSyncVersion int, todos []TodoDataset) {
+	dc.mu.Lock()
+	defer dc.mu.Unlock()
 
 	// TASK.1 sync TODO
 	todoCh := stream.Generator[TodoDateset](cxt, todos...)
 	doneCh := stream.FunIO[TodoDateset, interface{}](cxt, todoCh, func(td TodoDateset) interface{} {
 		todo := ConvertTodo(td)
-		s.ByID[td.ID] = &todo
+		dc.ByID[td.ID] = &todo
 		return nil
 	})
 	// doneChが終わるまで待機
 	for range doneCh {
 	}
 	// TASK.2 sync nextSyncVersion
-	s.nextVersion = currentSyncVersion + 1
+	dc.nextVersion = currentSyncVersion + 1
 }
 
-func (s *TStore) nextID() int {
+func (dc *TDocument) nextID() int {
 	max := 0
-	for id := range s.ByID {
+	for id := range dc.ByID {
 		if max < id {
 			max = id
 		}
