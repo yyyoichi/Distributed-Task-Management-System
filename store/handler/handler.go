@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"bytes"
@@ -7,19 +7,19 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/store"
+	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/document"
 )
 
 type StoreHandlers struct {
-	s *store.TStore
+	dc *document.TDocument
 }
 
 func NewStoreHandler() StoreHandlers {
-	return StoreHandlers{store.NewStore()}
+	return StoreHandlers{document.NewTDocument()}
 }
 
-func (sh *StoreHandlers) commandsHandler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("[KV] Call: commandsHandler")
+func (sh *StoreHandlers) CommandsHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("[KV] Call: CommandsHandler")
 	var data struct {
 		Task string `json:"task" validate:"required"`
 	}
@@ -32,7 +32,7 @@ func (sh *StoreHandlers) commandsHandler(w http.ResponseWriter, r *http.Request)
 
 	log.Printf("[KV] Get cmds '%s'\n", data.Task)
 	cmds := strings.Split(data.Task, " ")
-	resp, err := Exec(cmds, sh.s)
+	resp, err := Exec(cmds, sh.dc)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -44,8 +44,8 @@ func (sh *StoreHandlers) commandsHandler(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusOK)
 }
 
-func (sh *StoreHandlers) differencesHandler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("[KV] Call: differencesHandler")
+func (sh *StoreHandlers) DifferencesHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("[KV] Call: DifferencesHandler")
 	var data struct {
 		// 同期バージョン
 		Version int `json:"version" validate:"required"`
@@ -59,9 +59,9 @@ func (sh *StoreHandlers) differencesHandler(w http.ResponseWriter, r *http.Reque
 
 	log.Printf("[KV] Get version '%d'\n", data.Version)
 
-	resp := []store.TodoDateset{}
-	for id, todo := range sh.s.GetLatestVersionTodo(data.Version) {
-		resp = append(resp, store.TodoDateset{
+	resp := []document.TodoDataset{}
+	for id, todo := range sh.dc.GetLatestVersionTodo(data.Version) {
+		resp = append(resp, document.TodoDataset{
 			ID:        id,
 			Task:      todo.Task,
 			Completed: todo.Completed,
@@ -83,12 +83,12 @@ func (sh *StoreHandlers) differencesHandler(w http.ResponseWriter, r *http.Reque
 	w.WriteHeader(http.StatusOK)
 }
 
-func (sh *StoreHandlers) syncHandler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("[KV] Call: syncHandler")
+func (sh *StoreHandlers) SynchronizeHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("[KV] Call: SynchronizeHandler")
 	var data struct {
 		// 同期バージョン
-		Version int                 `json:"version" validate:"required"`
-		Todos   []store.TodoDateset `json:"todos" validate:"required"`
+		Version int                    `json:"version" validate:"required"`
+		Todos   []document.TodoDataset `json:"todos" validate:"required"`
 	}
 	if err := parseBody(r, &data); err != nil {
 		log.Println(err)
@@ -96,7 +96,7 @@ func (sh *StoreHandlers) syncHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(bytes.NewBufferString(err.Error()).Bytes())
 		return
 	}
-	sh.s.Sync(r.Context(), data.Version, data.Todos)
+	sh.dc.Synchronize(r.Context(), data.Version, data.Todos)
 
 	log.Println("[KV] Response 200")
 	w.WriteHeader(http.StatusOK)

@@ -4,7 +4,7 @@ go 1.21.3
 
 require (
 	github.com/go-playground/validator v9.31.0+incompatible
-	github.com/yyyoichi/Distributed-Task-Management-System v0.0.0-20231102094638-fd546e26876b
+	github.com/yyyoichi/Distributed-Task-Management-System v0.0.0-20231103010610-13ebcf55e31e
 )
 
 require (

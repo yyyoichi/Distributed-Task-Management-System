@@ -3,7 +3,7 @@ package polling
 import (
 	"context"
 
-	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/store"
+	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/document"
 	"github.com/yyyoichi/Distributed-Task-Management-System/sync/api"
 )
 
@@ -42,7 +42,7 @@ func (ss *SyncerStore) getDifferenceDetectorCh(cxt context.Context, currentSyncV
 }
 
 // 同期実行機を返す
-func (ss *SyncerStore) getSynchronizerCh(cxt context.Context, currentSyncVersion int, todos []store.TodoDateset) <-chan synchronizer {
+func (ss *SyncerStore) getSynchronizerCh(cxt context.Context, currentSyncVersion int, todos []document.TodoDataset) <-chan synchronizer {
 	return generateSyncronizer(cxt, ss.byID, func(k int, v api.SyncerInterface) synchronizer {
 		synchronizer := synchronizer{
 			SyncerID: k,

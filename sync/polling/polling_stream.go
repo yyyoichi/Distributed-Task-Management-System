@@ -3,7 +3,7 @@ package polling
 import (
 	"context"
 
-	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/store"
+	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/document"
 	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/stream"
 	"github.com/yyyoichi/Distributed-Task-Management-System/sync/api"
 )
@@ -31,8 +31,8 @@ func lineDetector2Differences(cxt context.Context, detectorCh <-chan differenceD
 }
 
 // 差分情報から複数のDatasetを送信する
-func dLineDifferences2Dataset(cxt context.Context, inCh <-chan differences, fn func(d differences, produce func(store.TodoDateset))) <-chan store.TodoDateset {
-	return stream.Demulti[differences, store.TodoDateset](cxt, inCh, fn)
+func dLineDifferences2Dataset(cxt context.Context, inCh <-chan differences, fn func(d differences, produce func(document.TodoDataset))) <-chan document.TodoDataset {
+	return stream.Demulti[differences, document.TodoDataset](cxt, inCh, fn)
 }
 
 // 同期実行機

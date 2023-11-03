@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/store"
+	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/document"
 	"github.com/yyyoichi/Distributed-Task-Management-System/sync/api"
 )
 
@@ -49,13 +49,12 @@ func (pm *PollingManager) Polling(cxt context.Context) {
 	// 差分情報チャネル
 	differencesCh := lineDetector2Differences(c, detectorCh, func(dd differenceDetector) differences {
 		resp := dd.Get() // 差分取得
-		log.Printf("\tSyncer[%s]: GetDifferences Result is %d, Err(%s)", pm.SyncerStore.Who(dd.SyncerID), len(resp.TodoDatasets), resp.Err)
 		return differences{SyncerID: dd.SyncerID, DiffResponse: resp}
 	})
 
 	// step.3 差分データセットのバージョンを書き換える //
 	// 差分データセットチャネル
-	todoCh := dLineDifferences2Dataset(c, differencesCh, func(d differences, produce func(store.TodoDateset)) {
+	todoCh := dLineDifferences2Dataset(c, differencesCh, func(d differences, produce func(document.TodoDataset)) {
 		// エラー発生時ポーリングを中断する
 		if d.DiffResponse.Err != nil {
 			who := pm.SyncerStore.byID[d.SyncerID].Me()
@@ -70,9 +69,12 @@ func (pm *PollingManager) Polling(cxt context.Context) {
 		}
 	})
 	// step.4 差分データセット //
-	todos := []store.TodoDateset{}
+	todos := []document.TodoDataset{}
 	for todo := range todoCh {
 		todos = append(todos, todo)
+	}
+	if len(todos) > 0 {
+		log.Printf("Synchronize: %dToDo", len(todos))
 	}
 
 	// TASK.2 //

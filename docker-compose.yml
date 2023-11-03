@@ -1,10 +1,10 @@
 version: '3'
 services:
-  handler:
+  cli-app:
     image: golang:1.21.3-bullseye
-    container_name: "handler"
+    container_name: "cli-app"
     volumes:
-      - ./handler:/workspace:cached
+      - ./app:/workspace:cached
     environment:
       - LB_ADDR=loadbrancer:3000
     tty: true
@@ -71,4 +71,4 @@ services:
       - 'sh'
       - '-c'
       - >-
-        go run /workspace/main.go
+        cd /workspace && go mod tidy && go run main.go
