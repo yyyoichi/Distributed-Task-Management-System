@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/store"
+	store "github.com/yyyoichi/Distributed-Task-Management-System/pkg/database"
 )
 
 var (

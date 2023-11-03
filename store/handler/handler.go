@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/store"
+	store "github.com/yyyoichi/Distributed-Task-Management-System/pkg/database"
 )
 
 type StoreHandlers struct {
