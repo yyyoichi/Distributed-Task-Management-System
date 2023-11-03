@@ -5,16 +5,16 @@ import (
 	"testing"
 )
 
-func TestTStore_Create(t *testing.T) {
-	tStore := NewStore()
+func TestTDocument_Create(t *testing.T) {
+	tDocument := NewTDocument()
 
-	id := tStore.Create("Task 1")
+	id := tDocument.Create("Task 1")
 	if id != 1 {
 		t.Errorf("Expected ID: 1, but got: %d", id)
 	}
 
 	// Check if the task is created correctly
-	todo, found := tStore.ByID[id]
+	todo, found := tDocument.ByID[id]
 	if !found {
 		t.Errorf("Expected to find TODO[ID:1], but it was not found")
 	} else {
@@ -33,18 +33,18 @@ func TestTStore_Create(t *testing.T) {
 	}
 }
 
-func TestTStore_Update(t *testing.T) {
-	tStore := NewStore()
-	id := tStore.Create("Task 1")
+func TestTDocument_Update(t *testing.T) {
+	tDocument := NewTDocument()
+	id := tDocument.Create("Task 1")
 
 	// Test updating with valid ID and status
-	err := tStore.Update(id, true)
+	err := tDocument.Update(id, true)
 	if err != nil {
 		t.Errorf("Expected no error, but got: %v", err)
 	}
 
 	// Check if the status is updated correctly
-	todo, found := tStore.ByID[id]
+	todo, found := tDocument.ByID[id]
 	if !found || !todo.Completed {
 		t.Errorf("Expected completed: true, but got: false")
 	}
@@ -53,25 +53,25 @@ func TestTStore_Update(t *testing.T) {
 	}
 
 	// Test updating with invalid ID
-	err = tStore.Update(2, true)
+	err = tDocument.Update(2, true)
 	expectedErr := "not found TODO[ID:2]"
 	if err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected error: '%s', but got: %v", expectedErr, err)
 	}
 }
 
-func TestTStore_Delete(t *testing.T) {
-	tStore := NewStore()
-	id := tStore.Create("Task 1")
+func TestTDocument_Delete(t *testing.T) {
+	tDocument := NewTDocument()
+	id := tDocument.Create("Task 1")
 
 	// Test deleting with valid ID
-	err := tStore.Delete(id)
+	err := tDocument.Delete(id)
 	if err != nil {
 		t.Errorf("Expected no error, but got: %v", err)
 	}
 
 	// Check if the TODO is deleted correctly
-	todo, found := tStore.ByID[id]
+	todo, found := tDocument.ByID[id]
 	if !found {
 		t.Errorf("Expected to find TODO[ID:1], but it was not found")
 	}
@@ -83,14 +83,14 @@ func TestTStore_Delete(t *testing.T) {
 	}
 
 	// Test deleting with invalid ID
-	err = tStore.Delete(2)
+	err = tDocument.Delete(2)
 	expectedErr := "not found TODO[ID:2]"
 	if err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected error: '%s', but got: %v", expectedErr, err)
 	}
 }
 
-func TestTStore_GetLatestVersionTodo(t *testing.T) {
+func TestTDocument_GetLatestVersionTodo(t *testing.T) {
 	test := []struct {
 		todos          []string
 		tagetVersion   int
@@ -109,22 +109,22 @@ func TestTStore_GetLatestVersionTodo(t *testing.T) {
 	}
 
 	for i, tt := range test {
-		tStore := NewStore()
+		tDocument := NewTDocument()
 		for _, todo := range tt.todos {
-			_ = tStore.Create(todo)
+			_ = tDocument.Create(todo)
 		}
-		actTODO := tStore.GetLatestVersionTodo(tt.tagetVersion)
+		actTODO := tDocument.GetLatestVersionTodo(tt.tagetVersion)
 		if len(actTODO) != tt.expectedLength {
 			t.Errorf("%d: Expected len(actTODO) is '%d', but got='%d'", i, tt.expectedLength, len(actTODO))
 		}
 	}
 }
 
-func TestTStore_SyncTodoAt(t *testing.T) {
-	tStore := NewStore()
-	id := tStore.Create("TaskA")  // version 1
-	tStore.Update(id, true)       // version 2
-	id2 := tStore.Create("TaskB") // version 3
+func TestTDocument_SyncTodoAt(t *testing.T) {
+	tDocument := NewTDocument()
+	id := tDocument.Create("TaskA")  // version 1
+	tDocument.Update(id, true)       // version 2
+	id2 := tDocument.Create("TaskB") // version 3
 	// now
 	// ID:1 version:2 TaskA completed
 	// ID 2 version:3 TaskB no-complete
@@ -140,15 +140,15 @@ func TestTStore_SyncTodoAt(t *testing.T) {
 		Version:   1,
 	}}
 	// exec
-	tStore.Sync(context.Background(), syncVersion, todo)
+	tDocument.Sync(context.Background(), syncVersion, todo)
 
-	if tStore.ByID[id].Completed {
+	if tDocument.ByID[id].Completed {
 		t.Error("Expected completed: false, but got: true")
 	}
-	if tStore.ByID[id].Version != 1 {
-		t.Errorf("Expected Version is 1, but got='%d'", tStore.ByID[id].Version)
+	if tDocument.ByID[id].Version != 1 {
+		t.Errorf("Expected Version is 1, but got='%d'", tDocument.ByID[id].Version)
 	}
-	if tStore.ByID[id2].Version != 3 {
-		t.Errorf("Expected Version is 3, but got='%d'", tStore.ByID[id].Version)
+	if tDocument.ByID[id2].Version != 3 {
+		t.Errorf("Expected Version is 3, but got='%d'", tDocument.ByID[id].Version)
 	}
 }
