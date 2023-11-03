@@ -1,4 +1,4 @@
-package store
+package document
 
 import (
 	"context"
@@ -132,7 +132,7 @@ func TestTDocument_SynchronizeTodoAt(t *testing.T) {
 	// sync version 1
 	syncVersion := 1
 	// sync todo (update no-completed)
-	todo := []TodoDateset{{
+	todo := []TodoDataset{{
 		ID:        1,
 		Task:      "TaskA",
 		Completed: false,

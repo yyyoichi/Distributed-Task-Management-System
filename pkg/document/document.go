@@ -1,4 +1,4 @@
-package store
+package document
 
 import (
 	"context"
@@ -85,8 +85,8 @@ func (dc *TDocument) Synchronize(cxt context.Context, currentSyncVersion int, to
 	defer dc.mu.Unlock()
 
 	// TASK.1 sync TODO
-	todoCh := stream.Generator[TodoDateset](cxt, todos...)
-	doneCh := stream.FunIO[TodoDateset, interface{}](cxt, todoCh, func(td TodoDateset) interface{} {
+	todoCh := stream.Generator[TodoDataset](cxt, todos...)
+	doneCh := stream.FunIO[TodoDataset, interface{}](cxt, todoCh, func(td TodoDataset) interface{} {
 		todo := ConvertTodo(td)
 		dc.ByID[td.ID] = &todo
 		return nil
