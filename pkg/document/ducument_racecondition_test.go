@@ -1,4 +1,4 @@
-package store
+package document
 
 import (
 	"strconv"
@@ -6,15 +6,15 @@ import (
 	"testing"
 )
 
-func TestTStore_ConcurrentAccess(t *testing.T) {
-	tStore := NewStore()
+func TestTDocument_ConcurrentAccess(t *testing.T) {
+	tDocument := NewTDocument()
 
 	// ゴルーチンの数
 	numGoroutines := 100
 
 	// ゴルーチンごとにTODOを作成する関数
 	createTodo := func(index int) {
-		tStore.Create("Task " + strconv.Itoa(index))
+		tDocument.Create("Task " + strconv.Itoa(index))
 	}
 
 	// ゴルーチンの終了を待つためのWaitGroup
@@ -35,25 +35,25 @@ func TestTStore_ConcurrentAccess(t *testing.T) {
 	// すべてのTODOが正しく作成されたことを確認
 	for i := 0; i < numGoroutines; i++ {
 		task := "Task " + strconv.Itoa(i)
-		id := tStore.FindIDByTask(task)
+		id := tDocument.FindIDByTask(task)
 		if id == -1 {
 			t.Errorf("Expected to find TODO with task: '%s', but it was not found", task)
 		}
 	}
 }
 
-func TestTStore_ConcurrentUpdate(t *testing.T) {
-	tStore := NewStore()
+func TestTDocument_ConcurrentUpdate(t *testing.T) {
+	tDocument := NewTDocument()
 
 	// 初期状態でTODOを作成
-	id := tStore.Create("Task 1")
+	id := tDocument.Create("Task 1")
 
 	// ゴルーチンの数
 	numGoroutines := 100
 
 	// ゴルーチンごとにTODOを更新する関数
 	updateTodo := func() {
-		tStore.Update(id, true)
+		tDocument.Update(id, true)
 	}
 
 	// ゴルーチンの終了を待つためのWaitGroup
@@ -72,24 +72,24 @@ func TestTStore_ConcurrentUpdate(t *testing.T) {
 	wg.Wait()
 
 	// TODOが正しく更新されたことを確認
-	todo, found := tStore.ByID[id]
+	todo, found := tDocument.ByID[id]
 	if !found || !todo.Completed {
 		t.Errorf("Expected completed: true, but got: false")
 	}
 }
 
-func TestTStore_ConcurrentDelete(t *testing.T) {
-	tStore := NewStore()
+func TestTDocument_ConcurrentDelete(t *testing.T) {
+	tDocument := NewTDocument()
 
 	// 初期状態でTODOを作成
-	id := tStore.Create("Task 1")
+	id := tDocument.Create("Task 1")
 
 	// ゴルーチンの数
 	numGoroutines := 100
 
 	// ゴルーチンごとにTODOを削除する関数
 	deleteTodo := func() {
-		tStore.Delete(id)
+		tDocument.Delete(id)
 	}
 
 	// ゴルーチンの終了を待つためのWaitGroup
@@ -108,7 +108,7 @@ func TestTStore_ConcurrentDelete(t *testing.T) {
 	wg.Wait()
 
 	// TODOが正しく削除されたことを確認
-	todo, found := tStore.ByID[id]
+	todo, found := tDocument.ByID[id]
 	if !found {
 		t.Errorf("Expected to find TODO[ID:1], but it was not found")
 	}
@@ -118,10 +118,10 @@ func TestTStore_ConcurrentDelete(t *testing.T) {
 }
 
 // FindIDByTask は指定されたtaskを持つTODOのIDを返します。存在しない場合は-1を返します。
-func (s *TStore) FindIDByTask(task string) int {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	for id, todo := range s.ByID {
+func (dc *TDocument) FindIDByTask(task string) int {
+	dc.mu.Lock()
+	defer dc.mu.Unlock()
+	for id, todo := range dc.ByID {
 		if todo.Task == task {
 			return id
 		}
