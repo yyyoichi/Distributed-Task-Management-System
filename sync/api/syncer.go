@@ -24,7 +24,14 @@ func (s *Syncer) Me() string { return fmt.Sprintf("Syncer[%s]", s.url) }
 
 // [currentSyncVersion]以上のバージョンを持つデータストア差異情報を取得する
 func (s *Syncer) GetDifference(currentSyncVersion int) DiffResponse {
-	reqBody := []byte(fmt.Sprintf(`{"version":%d`, currentSyncVersion))
+	reqBody, err := json.Marshal(struct {
+		Version int `json:"version"`
+	}{
+		Version: currentSyncVersion,
+	})
+	if err != nil {
+		return DiffResponse{Err: err}
+	}
 	resp, err := http.Post(fmt.Sprintf("%s/differences", s.url), "application/json", bytes.NewBuffer(reqBody))
 	if err != nil {
 		return DiffResponse{Err: err}
