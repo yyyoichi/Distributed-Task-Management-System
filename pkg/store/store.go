@@ -80,7 +80,7 @@ func (dc *TDocument) GetLatestVersionTodo(version int) map[int]Todo {
 
 // 同期を実行する
 // [currentSyncVersion]今回の同期バージョン, [todos]同期するTodoDataset
-func (dc *TDocument) Sync(cxt context.Context, currentSyncVersion int, todos []TodoDataset) {
+func (dc *TDocument) Synchronize(cxt context.Context, currentSyncVersion int, todos []TodoDataset) {
 	dc.mu.Lock()
 	defer dc.mu.Unlock()
 

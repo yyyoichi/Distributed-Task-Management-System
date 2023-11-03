@@ -120,7 +120,7 @@ func TestTDocument_GetLatestVersionTodo(t *testing.T) {
 	}
 }
 
-func TestTDocument_SyncTodoAt(t *testing.T) {
+func TestTDocument_SynchronizeTodoAt(t *testing.T) {
 	tDocument := NewTDocument()
 	id := tDocument.Create("TaskA")  // version 1
 	tDocument.Update(id, true)       // version 2
@@ -140,7 +140,7 @@ func TestTDocument_SyncTodoAt(t *testing.T) {
 		Version:   1,
 	}}
 	// exec
-	tDocument.Sync(context.Background(), syncVersion, todo)
+	tDocument.Synchronize(context.Background(), syncVersion, todo)
 
 	if tDocument.ByID[id].Completed {
 		t.Error("Expected completed: false, but got: true")
