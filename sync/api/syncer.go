@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/store"
+	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/document"
 )
 
 func NewSyncer(url string) *Syncer {
@@ -22,16 +22,16 @@ type Syncer struct {
 
 func (s *Syncer) Me() string { return fmt.Sprintf("Syncer[%s]", s.url) }
 
-// [currentVersion]以上のバージョンを持つデータストア差異情報を取得する
-func (s *Syncer) GetDifference(currentVersion int) DiffResponse {
-	reqBody := []byte(fmt.Sprintf(`{"version":%d`, currentVersion))
+// [currentSyncVersion]以上のバージョンを持つデータストア差異情報を取得する
+func (s *Syncer) GetDifference(currentSyncVersion int) DiffResponse {
+	reqBody := []byte(fmt.Sprintf(`{"version":%d`, currentSyncVersion))
 	resp, err := http.Post(fmt.Sprintf("%s/differences", s.url), "application/json", bytes.NewBuffer(reqBody))
 	if err != nil {
 		return DiffResponse{Err: err}
 	}
 	defer resp.Body.Close()
 
-	var data []store.TodoDateset
+	var data []document.TodoDataset
 	resBody, _ := io.ReadAll(resp.Body)
 	if err := json.Unmarshal(resBody, &data); err != nil {
 		return DiffResponse{Err: err}
@@ -41,12 +41,12 @@ func (s *Syncer) GetDifference(currentVersion int) DiffResponse {
 }
 
 // 同期を実行する
-func (s *Syncer) Synchronize(currentVersion int, todos []store.TodoDateset) SynchronizeResponse {
+func (s *Syncer) Synchronize(currentSyncVersion int, todos []document.TodoDataset) SynchronizeResponse {
 	reqBody, err := json.Marshal(struct {
-		Version int                 `json:"version"`
-		Todos   []store.TodoDateset `json:"todos"`
+		Version int                    `json:"version"`
+		Todos   []document.TodoDataset `json:"todos"`
 	}{
-		Version: currentVersion,
+		Version: currentSyncVersion,
 		Todos:   todos,
 	})
 	if err != nil {

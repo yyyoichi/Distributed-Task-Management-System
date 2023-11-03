@@ -5,7 +5,7 @@ import (
 	"log"
 	"testing"
 
-	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/store"
+	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/document"
 	"github.com/yyyoichi/Distributed-Task-Management-System/sync/api"
 )
 
@@ -47,8 +47,8 @@ func TestPollingManager(t *testing.T) {
 
 	// TEST:
 	log.Println("Start TestCase1 ..")
-	expCase := map[int]store.Todo{}
-	expCase[1] = store.Todo{
+	expCase := map[int]document.Todo{}
+	expCase[1] = document.Todo{
 		Task:      "TaskA",
 		Completed: true,
 		Deleted:   false,
@@ -85,13 +85,13 @@ func TestPollingManager(t *testing.T) {
 
 	// TEST:
 	log.Println("Start TestCase2 ..")
-	expCase[1] = store.Todo{
+	expCase[1] = document.Todo{
 		Task:      "TaskA",
 		Completed: false,
 		Deleted:   false,
 		Version:   2,
 	}
-	expCase[2] = store.Todo{
+	expCase[2] = document.Todo{
 		Task:      "TaskB",
 		Completed: false,
 		Deleted:   false,
@@ -102,9 +102,9 @@ func TestPollingManager(t *testing.T) {
 	testNode(t, datanodeC, expCase)
 }
 
-func testNode(t *testing.T, node *api.SyncerMock, expByID map[int]store.Todo) {
+func testNode(t *testing.T, node *api.SyncerMock, expByID map[int]document.Todo) {
 	for id, exp := range expByID {
-		todo, found := node.TStore.ByID[id]
+		todo, found := node.TDocument.ByID[id]
 		if !found {
 			t.Errorf("Expected ToDo[ID:%d] is found, but it was not found in %s", id, node.Me())
 		}

@@ -1,6 +1,6 @@
 package api
 
-import "github.com/yyyoichi/Distributed-Task-Management-System/pkg/store"
+import "github.com/yyyoichi/Distributed-Task-Management-System/pkg/document"
 
 // 同期通信機。データ通信を行うために必要なメソッドを持つ。
 type SyncerInterface interface {
@@ -10,14 +10,14 @@ type SyncerInterface interface {
 	// 同期実行をリクエストする
 	// - [currentSyncVersion]今回の同期バージョン。
 	// - [todos]同期内容
-	Synchronize(currentSyncVersion int, todo []store.TodoDateset) SynchronizeResponse
+	Synchronize(currentSyncVersion int, todo []document.TodoDataset) SynchronizeResponse
 	Me() string
 }
 
 // 差分検知レスポンス
 type DiffResponse struct {
 	Err          error
-	TodoDatasets []store.TodoDateset
+	TodoDatasets []document.TodoDataset
 }
 
 // 同期実行レスポンス
