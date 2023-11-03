@@ -49,7 +49,6 @@ func (pm *PollingManager) Polling(cxt context.Context) {
 	// 差分情報チャネル
 	differencesCh := lineDetector2Differences(c, detectorCh, func(dd differenceDetector) differences {
 		resp := dd.Get() // 差分取得
-		log.Printf("\tSyncer[%s]: GetDifferences Result is %d, Err(%s)", pm.SyncerStore.Who(dd.SyncerID), len(resp.TodoDatasets), resp.Err)
 		return differences{SyncerID: dd.SyncerID, DiffResponse: resp}
 	})
 
@@ -73,6 +72,9 @@ func (pm *PollingManager) Polling(cxt context.Context) {
 	todos := []document.TodoDataset{}
 	for todo := range todoCh {
 		todos = append(todos, todo)
+	}
+	if len(todos) > 0 {
+		log.Printf("Synchronize: %dToDo", len(todos))
 	}
 
 	// TASK.2 //
