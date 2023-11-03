@@ -2,7 +2,7 @@ up:
 	docker-compose up -d --build
 exec:
 	@echo "Run 'go run .' in the docker container"
-	docker exec -w /workspace -it handler /bin/bash
+	docker exec -w /workspace -it cli-app /bin/bash
 
 logs-%:
 	docker logs -f ${@:logs-%=%}
