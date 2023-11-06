@@ -3,6 +3,7 @@ package document
 import (
 	"context"
 	"testing"
+	"time"
 )
 
 func TestTDocument_Create(t *testing.T) {
@@ -120,7 +121,80 @@ func TestTDocument_GetLatestVersionTodo(t *testing.T) {
 	}
 }
 
-func TestTDocument_SynchronizeTodoAt(t *testing.T) {
+func TestTDocument_SynchronizeTodo(t *testing.T) {
+	tDocument := NewTDocument()
+	id := tDocument.Create("TaskA") // version 1
+	tDocument.Update(id, true)      // version 2
+	tDocument.Create("TaskB")       // version 3
+	// now
+	// ID:1 version:2 TaskA completed
+	// ID 2 version:3 TaskB no-complete
+
+	test := []struct {
+		syncTodo TodoDataset
+		expTodo  Todo
+	}{
+		{
+			syncTodo: TodoDataset{
+				ID:        1,
+				Task:      "TaskA should be updated",
+				Version:   1,
+				UpdatedAt: time.Now().Add(time.Duration(24 * time.Hour)),
+			},
+			expTodo: Todo{
+				Version: 1,
+			},
+		},
+		{
+			syncTodo: TodoDataset{
+				ID:        2,
+				Task:      "TaskB should not be updated",
+				Version:   1,
+				UpdatedAt: time.Now().Add(time.Duration(-24 * time.Hour)),
+			},
+			expTodo: Todo{
+				Version: 3,
+			},
+		},
+		{
+			syncTodo: TodoDataset{
+				ID:        3,
+				Task:      "TaskC should be created",
+				Version:   1,
+				UpdatedAt: time.Now().Add(time.Duration(24 * time.Hour)),
+			},
+			expTodo: Todo{
+				Version: 1,
+			},
+		},
+		{
+			syncTodo: TodoDataset{
+				ID:        4,
+				Task:      "TaskD should be created",
+				Version:   1,
+				UpdatedAt: time.Now().Add(time.Duration(-24 * time.Hour)),
+			},
+			expTodo: Todo{
+				Version: 1,
+			},
+		},
+	}
+
+	for i, tt := range test {
+		id := tt.syncTodo.ID
+		tDocument.synchronizeTodo(tt.syncTodo)
+		todo, found := tDocument.ByID[id]
+		if !found {
+			t.Errorf("Expected to find TODO[ID:%d], but it was not found", id)
+
+		}
+		if todo.Version != tt.expTodo.Version {
+			t.Errorf("%d: Expected Version is '%d', but got='%d'", i, tt.expTodo.Version, todo.Version)
+		}
+	}
+}
+
+func TestTDocument_Synchronize(t *testing.T) {
 	tDocument := NewTDocument()
 	id := tDocument.Create("TaskA")  // version 1
 	tDocument.Update(id, true)       // version 2
@@ -138,6 +212,7 @@ func TestTDocument_SynchronizeTodoAt(t *testing.T) {
 		Completed: false,
 		Deleted:   false,
 		Version:   1,
+		UpdatedAt: time.Now().Add(time.Duration(1 * time.Second)),
 	}}
 	// exec
 	tDocument.Synchronize(context.Background(), syncVersion, todo)

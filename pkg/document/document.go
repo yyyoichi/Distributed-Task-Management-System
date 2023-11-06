@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/stream"
 )
@@ -31,6 +32,7 @@ func (dc *TDocument) Create(task string) int {
 		Completed: false,
 		Deleted:   false,
 		Version:   dc.nextVersion,
+		UpdatedAt: time.Now(),
 	}
 	dc.nextVersion++
 	dc.mu.Unlock()
@@ -46,6 +48,7 @@ func (dc *TDocument) Update(id int, completed bool) error {
 	}
 	todo.Completed = completed
 	todo.Version = dc.nextVersion
+	todo.UpdatedAt = time.Now()
 	dc.nextVersion++
 	dc.mu.Unlock()
 	return nil
@@ -86,16 +89,31 @@ func (dc *TDocument) Synchronize(cxt context.Context, currentSyncVersion int, to
 
 	// TASK.1 sync TODO
 	todoCh := stream.Generator[TodoDataset](cxt, todos...)
-	doneCh := stream.FunIO[TodoDataset, interface{}](cxt, todoCh, func(td TodoDataset) interface{} {
-		todo := ConvertTodo(td)
-		dc.ByID[td.ID] = &todo
-		return nil
-	})
+	doneCh := stream.FunIO[TodoDataset, interface{}](cxt, todoCh, dc.synchronizeTodo)
 	// doneChが終わるまで待機
 	for range doneCh {
 	}
 	// TASK.2 sync nextSyncVersion
 	dc.nextVersion = currentSyncVersion + 1
+}
+
+// must use in mu.Lock
+func (dc *TDocument) synchronizeTodo(td TodoDataset) interface{} {
+	synchronizaionToDo := ConvertTodo(td)
+	todoInDocumnt, found := dc.ByID[td.ID]
+	if !found {
+		dc.ByID[td.ID] = &synchronizaionToDo
+		return nil
+	}
+	// Conflict! ToDo[ID: id] exists in the document
+	// Resolve conflicts at update time.
+	// The latest ToDo must remain in the document.
+	// If the sync todo equal to in the document, it should be synchronize. Becaouse it is todo in the same document.
+	inDocumentToDoIsLatest := todoInDocumnt.UpdatedAt.After(synchronizaionToDo.UpdatedAt)
+	if !inDocumentToDoIsLatest {
+		*todoInDocumnt = synchronizaionToDo
+	}
+	return nil
 }
 
 func (dc *TDocument) nextID() int {

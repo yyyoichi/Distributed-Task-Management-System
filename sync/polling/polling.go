@@ -68,11 +68,14 @@ func (pm *PollingManager) Polling(cxt context.Context) {
 			produce(todo)
 		}
 	})
-	// step.4 差分データセット //
-	todos := []document.TodoDataset{}
+	// step.4 差分の競合を解決する //
+	conflictResolver := ConflictResolver{ToDoByID: make(map[int]document.TodoDataset)}
 	for todo := range todoCh {
-		todos = append(todos, todo)
+		conflictResolver.AddToDo(todo)
 	}
+
+	// step.5 差分を取得する //
+	todos := conflictResolver.GetSlice()
 	if len(todos) > 0 {
 		log.Printf("Synchronize: %dToDo", len(todos))
 	}
