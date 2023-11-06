@@ -47,25 +47,29 @@ Step.2 では同期機構の実装を加えた。
 0. `初期状態`
 
 ```
+<!-- datanode -->
 - (empty)
 ```
 
-1.  `create TaskA`
+1.  cli: `create TaskA`
 
 ```
+<!-- datanode -->
 - ID:1, Version:1 TaskA, no-complete
 ```
 
-2.  `create TaskB`
+2.  cli: `create TaskB`
 
 ```
+<!-- datanode -->
 - ID:1, Version:1 TaskA, no-complete
 - ID:2, Version:2 TaskB, no-complete
 ```
 
-3.  `update 1 complete`
+3.  cli: `update 1 complete`
 
 ```
+<!-- datanode -->
 - ID:1, Version:3 TaskA, completed
 - ID:2, Version:2 TaskB, no-complete
 ```
@@ -83,7 +87,7 @@ Step.2 では同期機構の実装を加えた。
 
 便宜的に 2 つのデータノードを A,B と書きます。
 
-0. `datanode`
+0. `初期状態`
 
 ```
 DatanodeA
@@ -93,18 +97,18 @@ DatanodeB
 - (empty)
 ```
 
-1. `Get differences from version 1 onwards`
+1. sync: `Get differences from version 1 onwards`
 
 ```
-sync machine
+<!-- in sync machine -->
 - ID:1, Version:3 TaskA, completed
 - ID:2, Version:2 TaskB, no-complete
 ```
 
-2. `Stamps the sync machine version and sends it to all data nodes`
+2. sync: `Stamps the sync machine version and sends it to all data nodes`
 
 ```
-sync machine
+<!-- in sync machine -->
 - ID:1, Version:1 TaskA, completed
 - ID:2, Version:1 TaskB, no-complete
 
@@ -122,7 +126,7 @@ DatanodeB
 - ID:2, Version:1 TaskB, no-complete
 ```
 
-4. `cli: create TaskC`
+4. cli: `create TaskC`
 
 ```
 DatanodeA
@@ -131,7 +135,7 @@ DatanodeA
 DatanodeB
 - ID:1, Version:1 TaskA, completed
 - ID:2, Version:1 TaskB, no-complete
-- ID:3, Version:4 TaskC, no-complete
+- ID:3, Version:2 TaskC, no-complete
 ```
 
 ### 実行結果
