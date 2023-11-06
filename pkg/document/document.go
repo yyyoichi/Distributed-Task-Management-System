@@ -108,8 +108,9 @@ func (dc *TDocument) synchronizeTodo(td TodoDataset) interface{} {
 	// Conflict! ToDo[ID: id] exists in the document
 	// Resolve conflicts at update time.
 	// The latest ToDo must remain in the document.
-	synchronizaionToDoIsLatest := synchronizaionToDo.UpdatedAt.After(todoInDocumnt.UpdatedAt)
-	if synchronizaionToDoIsLatest {
+	// If the sync todo equal to in the document, it should be synchronize. Becaouse it is todo in the same document.
+	inDocumentToDoIsLatest := todoInDocumnt.UpdatedAt.After(synchronizaionToDo.UpdatedAt)
+	if !inDocumentToDoIsLatest {
 		*todoInDocumnt = synchronizaionToDo
 	}
 	return nil
