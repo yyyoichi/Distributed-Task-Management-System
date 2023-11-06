@@ -149,3 +149,121 @@ DatanodeB
 
 - `create`の後にデータを参照`list`できいて、
 - 右側`02:04:36 create`の直後に、左側で`02:03:48`に同期されていることが分かる。
+
+## Step.3
+
+step.2 では同期機構が動作してデータノード間の一貫性が一定程度保持されました。
+
+step.3 では、同期時に発生しうる競合について焦点をあて解決していく。
+
+### 競合発生ポイント
+
+ここでの競合とは同期実行時に同じデータに矛盾するデータ更新が存在することを指す。
+
+このシステムでは競合を解決するために最終更新日時を使い、競合が発生しうるポイントでは**常に競合が発生した場合は最新のデータに上書き**をする方針を取る。
+
+#### Point1. 差分調査時
+
+競合発生のポイントの一つ目は、同期機構が差分を取得したタイミングで発生（発覚）するもの。
+
+1. ``初期状態``
+```
+<!-- DatanodeA -->
+- ID:1, Version:1 TaskA, completed 00:00
+DatanodeB
+- ID:1, Version:1 TaskA, completed 00:00
+```
+
+2. cli(to DatanodeA): `update 1 open` 
+```
+<!-- DatanodeA -->
+- ID:1, Version:3 TaskA, no-complete 00:01
+<!-- DatanodeB -->
+- ID:1, Version:1 TaskA, completed 00:00
+```
+
+3. cli(to DatanodeB): `update 1 complete`
+```
+<!-- DatanodeA -->
+- ID:1, Version:3 TaskA, no-complete  00:01
+<!-- DatanodeB -->
+- ID:1, Version:3 TaskA, completed   00:02
+```
+
+4. sync: `Get differences from version 1 onwards, and Stamps the sync machine version`
+
+```
+<!-- in sync machine -->
+- ID:1, Version:1 TaskA, no-complete 00:01
+- ID:1, Version:1 TaskA, completed 00:02
+<!-- ?? -->
+```
+
+5. `resolve conflict`
+```
+<!-- in sync machine -->
+- ID:1, Version:1 TaskA, completed 00:02
+```
+
+上の例の時、最後に更新された``3. ``の動作を信頼し、ID:1については``completed``として扱われる。当然どちらが後かについては、ToDoデータに最終更新日時を追加することで確認する。
+
+
+#### Point.2 差分同期時
+
+競合発生の2つ目のポイントは、差分をデータノードに同期する間に発生する（発見される）もの。
+
+これはデータノードが更新されるタイミングが、同期機構が差分を取得した後であり、かつ同期機構が差分を適用（同期）する前に起きた時に生じる。
+
+> 上の例の続き
+
+6. cli(to DatanodeA): `update 1 open`
+
+```
+<!-- DatanodeA -->
+- ID:1, Version:3 TaskA, no-complete 00:03
+<!-- DatanodeB -->
+- ID:1, Version:3 TaskA, completed 00:02
+```
+
+7. sync: `sends to all data nodes`
+```
+<!-- in sync machine(reprint) -->
+- ID:1, Version:1 TaskA, completed 00:02
+```
+
+8. `resolve confilict in datanodes`
+```
+<!-- DatanodeA -->
+- ID:1, Version:3 TaskA, no-complete 00:03
+<!-- DatanodeB -->
+- ID:1, Version:1 TaskA, completed 00:02
+```
+
+このときも最終更新分を信頼し、更新があったデータノードAでは同期データの上書きは行われなかった。
+
+なお、次の同期実行で（特に変更がなければ）データノードBにデータノードAの変更が同期される。
+
+
+### 実装点
+
+このStep.3 では主に3つの変更がなされた。
+
+1. キーバリューストアに最終更新日時の追加
+2. 同期機構内の競合解決アルゴリズムを実装
+3. キーバリューストア内に競合解決アルゴリズムを追加
+
+``1.`` についてはそのままのであるがコードをこれまでの整理のためにもデータ構造を載せておく。
+
+```
+<!-- pkg/document/todo.go: -->
+type Todo struct {
+	Task      string
+	Completed bool
+	Version   int
+	Deleted   bool
+	UpdatedAt time.Time
+}
+```
+
+``2.3.``については最終更新日時を比べるのみなので特に説明はしない。
+
