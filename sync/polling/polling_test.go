@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"testing"
+	"time"
 
 	"github.com/yyyoichi/Distributed-Task-Management-System/pkg/document"
 	"github.com/yyyoichi/Distributed-Task-Management-System/sync/api"
@@ -53,6 +54,7 @@ func TestPollingManager(t *testing.T) {
 		Completed: true,
 		Deleted:   false,
 		Version:   1,
+		UpdatedAt: time.Now().Add(time.Duration(time.Minute * 1)),
 	}
 	testNode(t, datanodeA, expCase)
 	testNode(t, datanodeB, expCase)
@@ -90,12 +92,14 @@ func TestPollingManager(t *testing.T) {
 		Completed: false,
 		Deleted:   false,
 		Version:   2,
+		UpdatedAt: time.Now().Add(time.Duration(time.Minute * 1)),
 	}
 	expCase[2] = document.Todo{
 		Task:      "TaskB",
 		Completed: false,
 		Deleted:   false,
 		Version:   2,
+		UpdatedAt: time.Now().Add(time.Duration(time.Minute * 1)),
 	}
 	testNode(t, datanodeA, expCase)
 	testNode(t, datanodeB, expCase)
